@@ -35,12 +35,9 @@ public class MainActivity extends AppCompatActivity {
 
         b = (Button)findViewById(R.id.button);
         c = (Button)findViewById(R.id.button2);
-        b.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent ii = new Intent(MainActivity.this,graphActivity.class);
-                MainActivity.this.startActivity(ii);
-            }
+        b.setOnClickListener(v -> {
+            Intent ii = new Intent(MainActivity.this,graphActivity.class);
+            MainActivity.this.startActivity(ii);
         });
 
         c.setOnClickListener(new View.OnClickListener() {
@@ -55,16 +52,16 @@ public class MainActivity extends AppCompatActivity {
 
     public void connect(){
 
-        String clientId = MqttClient.generateClientId();
+        String clientId ="KBUjEzIRCBsvCgcNCSwfHQ4"; MqttClient.generateClientId();
         final MqttAndroidClient client =
-                new MqttAndroidClient(this.getApplicationContext(), "tcp://m12.cloudmqtt.com:17389",
+                new MqttAndroidClient(this.getApplicationContext(), "tcp://mqtt3.thingspeak.com:1883",//mqtt:// not working > tcp://working
                         clientId);
 
         MqttConnectOptions options = new MqttConnectOptions();
         options.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1);
         options.setCleanSession(false);
-        options.setUserName("snyhhyzw");
-        options.setPassword("LpZK32PEBN5q".toCharArray());
+        options.setUserName("KBUjEzIRCBsvCgcNCSwfHQ4");
+        options.setPassword("syDJo4Ad/oVb8rjbSAuf8nQE".toCharArray());
         try {
             IMqttToken token = client.connect(options);
             //IMqttToken token = client.connect();
@@ -74,25 +71,25 @@ public class MainActivity extends AppCompatActivity {
                     // We are connected
                     Log.d("file", "onSuccess");
                     //publish(client,"payloadd");
-                    subscribe(client,"dht");
-                    subscribe(client,"bmp");
+                    subscribe(client,"channels/2071049/subscribe/fields/field1");
+                 //   subscribe(client,"channels/2071049/fields/field1");
                     client.setCallback(new MqttCallback() {
                         TextView tt = (TextView) findViewById(R.id.tt);
                         TextView th = (TextView) findViewById(R.id.th);
                         @Override
                         public void connectionLost(Throwable cause) {
-
+                            Log.d("file", "connectionLost");
                         }
 
                         @Override
                         public void messageArrived(String topic, MqttMessage message) throws Exception {
-                            Log.d("file", message.toString());
+                            Log.d("file 1", message.toString());
 
-                            if (topic.equals("dht")){
+                            if (topic.equals("channels/2071049/subscribe/fields/field1")){
                                 tt.setText(message.toString());
                             }
 
-                            if (topic.equals("bmp")){
+                            if (topic.equals("channels/2071049/fields/field1")){
                                 th.setText(message.toString());
                             }
 

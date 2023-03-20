@@ -10,7 +10,7 @@
         android:id="@+id/tt"
         android:layout_width="103dp"
         android:layout_height="67dp"
-        android:layout_marginRight="40dp"
+        android:layout_marginEnd="40dp"
         android:layout_marginTop="64dp"
         android:fontFamily="monospace"
         android:gravity="center"
