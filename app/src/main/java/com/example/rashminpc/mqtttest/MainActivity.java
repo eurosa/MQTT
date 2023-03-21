@@ -94,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("file", "onSuccess");
                     //publish(client,"payloadd");
                     subscribe(client,"channels/2071049/subscribe/fields/field1");
+                    publish(client, String.valueOf(20));
                  //   subscribe(client,"channels/2071049/fields/field1");
                     client.setCallback(new MqttCallback() {
                         TextView tt = (TextView) findViewById(R.id.tt);
@@ -101,6 +102,8 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void connectionLost(Throwable cause) {
                             Log.d("file", "connectionLost");
+                            Log.d("file 2","some question has been solved");
+                            Log.d("file3","go for dinner system ready for your unbreakable");
                         }
 
                         @Override
@@ -139,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void publish(MqttAndroidClient client, String payload){
-        String topic = "foo/bar";
+        String topic = "channels/2071049/publish/fields/field3";
         byte[] encodedPayload = new byte[0];
         try {
             encodedPayload = payload.getBytes("UTF-8");
