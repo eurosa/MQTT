@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
                         public void connectionLost(Throwable cause) {
                             Log.d("file", "connectionLost");
                             Log.d("file 2","some question has been solved");
-                            Log.d("file3","go for dinner system ready for your unbreakable");
+                            Log.d("file 3","go for dinner system ready for your unbreakable");
                         }
 
                         @Override
