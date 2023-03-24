@@ -8,8 +8,8 @@
         android:title="My Account" />
 
     <item
-        android:id="@+id/nav_settings"
-        android:title="Settings" />
+        android:id="@+id/nav_credential"
+        android:title="Set Wifi Credentials"/>
 
     <item
         android:id="@+id/nav_logout"

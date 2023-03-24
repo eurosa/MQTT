@@ -68,39 +68,44 @@
         android:textSize="30sp"
       />
     </LinearLayout>
+
     <LinearLayout
         android:id="@+id/graphLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/humidityLayout"
+        android:layout_marginTop="-2dp"
         android:orientation="vertical">
-    <Button
-        android:id="@+id/button"
-        android:layout_width="347dp"
-        android:layout_height="91dp"
-        android:layout_marginBottom="120dp"
-        android:layout_marginStart="20dp"
-        android:fontFamily="serif-monospace"
-        android:gravity="center"
-        android:text="GRAPH -Temp"
-        android:textSize="36sp"/>
 
-    <Button
-        android:id="@+id/button2"
-        android:layout_width="347dp"
-        android:layout_height="91dp"
-        android:layout_marginBottom="48dp"
-        android:layout_marginStart="16dp"
-        android:fontFamily="serif-monospace"
-        android:gravity="center"
-        android:text="GRAPH-Humid"
-        android:textSize="36sp"  />
+        <Button
+            android:id="@+id/button"
+            android:layout_width="347dp"
+            android:layout_height="91dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="100dp"
+            android:layout_marginBottom="100dp"
+            android:fontFamily="serif-monospace"
+            android:gravity="center"
+            android:text="GRAPH-Temp"
+            android:textSize="36sp" />
+
+        <Button
+            android:id="@+id/button2"
+            android:layout_width="347dp"
+            android:layout_height="91dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginBottom="48dp"
+            android:fontFamily="serif-monospace"
+            android:gravity="center"
+            android:text="GRAPH-Humid"
+            android:textSize="36sp" />
     </LinearLayout>
 </RelativeLayout>
     <!-- this the navigation view which draws and shows the navigation drawer -->
     <!-- include the menu created in the menu folder -->
 
     <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
