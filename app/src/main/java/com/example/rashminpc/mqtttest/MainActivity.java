@@ -185,6 +185,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    @Override
+    public void onRestart()
+    {
+        super.onRestart();
+        connect();
+        //finish();
+        //startActivity(getIntent());
+    }
 
 //    public void printMessege(MqttAndroidClient client){
 //        client.setCallback(new MqttCallback() {

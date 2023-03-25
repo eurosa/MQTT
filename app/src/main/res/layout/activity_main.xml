@@ -9,6 +9,7 @@
 <RelativeLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
+
     <LinearLayout
         android:id="@+id/tempLayout"
         android:layout_width="match_parent"
@@ -19,24 +20,23 @@
             android:id="@+id/temp"
             android:layout_width="182dp"
             android:layout_height="69dp"
-            android:layout_marginEnd="36dp"
             android:layout_marginTop="64dp"
+            android:layout_marginEnd="36dp"
             android:fontFamily="monospace"
             android:gravity="center"
             android:text="Temperature"
-            android:textSize="24sp"/>
+            android:textSize="24sp" />
 
         <TextView
             android:id="@+id/tt"
             android:layout_width="103dp"
             android:layout_height="67dp"
-            android:layout_marginEnd="40dp"
             android:layout_marginTop="64dp"
+            android:layout_marginEnd="40dp"
             android:fontFamily="monospace"
             android:gravity="center"
             android:text="...."
-            android:textSize="30sp"
-        />
+            android:textSize="30sp" />
     </LinearLayout>
     <LinearLayout
         android:id="@+id/humidityLayout"
