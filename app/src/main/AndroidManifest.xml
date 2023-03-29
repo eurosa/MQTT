@@ -5,7 +5,9 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -15,14 +17,14 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".WifiActivity"
+            android:name="com.myqtt.minpc.mqtttest.WifiActivity"
             android:exported="false">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
         <activity
-            android:name=".Main2Activity"
+            android:name="com.myqtt.minpc.mqtttest.Main2Activity"
             android:exported="true"
             android:theme="@style/SplashTheme">
             <intent-filter>
@@ -34,9 +36,9 @@
 
         <service android:name="org.eclipse.paho.android.service.MqttService" />
 
-        <activity android:name=".MainActivity" />
-        <activity android:name=".graphActivity" />
-        <activity android:name=".Main3Activity" />
+        <activity android:name="com.myqtt.minpc.mqtttest.MainActivity" />
+        <activity android:name="com.myqtt.minpc.mqtttest.graphActivity" />
+        <activity android:name="com.myqtt.minpc.mqtttest.Main3Activity" />
     </application>
 
 </manifest>

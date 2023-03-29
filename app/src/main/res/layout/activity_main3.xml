@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.rashminpc.mqtttest.graphActivity">
+    tools:context="com.example.rashminpc.mqtttest.com.myqtt.rashminpc.mqtttest.graphActivity">
 
     <com.github.mikephil.charting.charts.LineChart
         android:id="@+id/chart"

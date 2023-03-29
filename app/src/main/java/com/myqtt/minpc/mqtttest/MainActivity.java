@@ -1,7 +1,10 @@
-package com.example.rashminpc.mqtttest;
+package com.myqtt.minpc.mqtttest;
 
+import android.content.Context;
 import android.content.Intent;
 
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -18,6 +21,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.rashminpc.mqtttest.R;
 import com.google.android.material.navigation.NavigationView;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
@@ -29,14 +33,23 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
+import java.net.NetworkInterface;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+    private static final String CHANNEL_NAME = "name";
     public DrawerLayout drawerLayout;
     public ActionBarDrawerToggle actionBarDrawerToggle;
     Button b ;
     Button c;
+    private  String API_KEY ="api_key" ;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,8 +92,47 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
+    public void GetWifiMacAddress()
+    {
+
+        WifiManager wifiMan = (WifiManager) this.getApplicationContext().getSystemService(
+                Context.WIFI_SERVICE);
+        WifiInfo wifiInf = wifiMan.getConnectionInfo();
+        String macAddr = wifiInf.getMacAddress();
+        String ipAddr = String.valueOf(wifiInf.getIpAddress());
+        String ssIdAddr = String.valueOf(wifiInf.getSSID());
+        Log.d("WIFI_INFO","MAC Address: "+macAddr+" IP Address: "+ipAddr+" SSID: "+ssIdAddr+" MAC "+getMacAddr());
+    }
+
+    public static String getMacAddr() {
+        try {
+            List<NetworkInterface> all = Collections.list(NetworkInterface.getNetworkInterfaces());
+            for (NetworkInterface nif : all) {
+                if (!nif.getName().equalsIgnoreCase("wlan0")) continue;
+
+                byte[] macBytes = nif.getHardwareAddress();
+                if (macBytes == null) {
+                    return "";
+                }
+
+                StringBuilder res1 = new StringBuilder();
+                for (byte b : macBytes) {
+                    res1.append(String.format("%02X:",b));
+                }
+
+                if (res1.length() > 0) {
+                    res1.deleteCharAt(res1.length() - 1);
+                }
+                return res1.toString();
+            }
+        } catch (Exception ex) {
+        }
+        return "02:00:00:00:00:00";
+    }
 
     public void connect(){
+
+        GetWifiMacAddress();
 
         String clientId ="KBUjEzIRCBsvCgcNCSwfHQ4"; MqttClient.generateClientId();
         final MqttAndroidClient client =
@@ -229,7 +281,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Handle navigation view item clicks here.
         switch (item.getItemId()) {
 
-            case R.id.nav_credential: {
+            case R.id.nav_credential:
                 // Do something
                 Intent myIntent = new Intent(getApplicationContext(), WifiActivity.class);
                 // myIntent.putExtra("","");
@@ -237,11 +289,60 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 // Toast.makeText(getApplicationContext(),"My credentials",Toast.LENGTH_SHORT);
                 Log.d("click_credential",""+"click credential");
                 break;
-            }
+            case R.id.nav_channe:
+                CreateChannel();
+                break;
+
         }
         //close navigation drawer
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void CreateChannel() {
+        Log.d("sent_data","Create Channel");
+
+        Thread sendThread = new Thread() {
+
+            public void run() {
+
+                RequestHandler rh = new RequestHandler();
+                HashMap<String, String> param = new HashMap<String, String>();
+                //----------------------------------------------------------------
+                param.put(API_KEY, "ILA15VPFYBECOKAS");
+                param.put(CHANNEL_NAME, "XChannel");
+              
+
+                //  Log.d("sent_data","id "+key_id+" user_id "+user_id+" device_code "+device_code+" device room "+device_room_name);
+                String result=rh.sendPostRequest("https://api.thingspeak.com/channels.json", param);
+
+
+                try {
+                    JSONObject json = new JSONObject(result);
+                    runOnUiThread(() -> {
+                        try {
+                            if(json.getString("query_result").equals("SUCCESS")){
+                                Toast.makeText(getApplicationContext(),"Data saved successfully",Toast.LENGTH_LONG).show();
+                            }else{
+
+                                Toast.makeText(getApplicationContext(),"Data Saved Failure!",Toast.LENGTH_LONG).show();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                    });
+                  //https://github.com/eurosa/stock-master.git
+                    Log.d("sent_data",json.getString("query_result"));
+
+                } catch (Exception e) {
+                    Log.d("my_error",""+e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+        };
+        sendThread.start();
+
     }
 
 }

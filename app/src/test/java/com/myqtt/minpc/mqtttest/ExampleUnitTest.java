@@ -1,4 +1,4 @@
-package com.example.rashminpc.mqtttest;
+package com.myqtt.minpc.mqtttest;
 
 import org.junit.Test;
 

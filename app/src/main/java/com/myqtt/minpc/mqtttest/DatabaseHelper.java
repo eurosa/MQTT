@@ -1,4 +1,4 @@
-package com.example.rashminpc.mqtttest;
+package com.myqtt.minpc.mqtttest;
 
 import android.content.ContentValues;
 import android.content.Context;

@@ -1,9 +1,10 @@
-package com.example.rashminpc.mqtttest;
+package com.myqtt.minpc.mqtttest;
 
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.example.rashminpc.mqtttest.R;
 import com.github.mikephil.charting.charts.LineChart;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
