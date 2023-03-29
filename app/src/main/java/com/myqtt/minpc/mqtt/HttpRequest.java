@@ -1,4 +1,4 @@
-package com.myqtt.minpc.mqtttest;
+package com.myqtt.minpc.mqtt;
 
 /**
  * Created by Parsania Hardik on 18-Apr-17.

@@ -1,4 +1,4 @@
-package com.myqtt.minpc.mqtttest;
+package com.myqtt.minpc.mqtt;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;

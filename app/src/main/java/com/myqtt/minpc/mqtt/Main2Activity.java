@@ -1,4 +1,4 @@
-package com.myqtt.minpc.mqtttest;
+package com.myqtt.minpc.mqtt;
 
 import android.content.Intent;
 import androidx.appcompat.app.AppCompatActivity;

@@ -1,4 +1,4 @@
-package com.myqtt.minpc.mqtttest;
+package com.myqtt.minpc.mqtt;
 
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,14 +19,14 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.io.UnsupportedEncodingException;
 
-public class Main3Activity extends AppCompatActivity {
+public class graphActivity extends AppCompatActivity {
 
     chartHelper mChart;
     LineChart chart;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main3);
+        setContentView(R.layout.activity_graph);
         chart = (LineChart) findViewById(R.id.chart);
         mChart = new chartHelper(chart);
         connect();
@@ -66,11 +66,10 @@ public class Main3Activity extends AppCompatActivity {
                             Log.d("file", message.toString());
 
                             if (topic.equals("dht")){
-
+                                mChart.addEntry(Float.valueOf(message.toString()));
                             }
 
                             if (topic.equals("bmp")){
-                                mChart.addEntry(Float.valueOf(message.toString()));
                             }
 
                         }
