@@ -1,10 +1,17 @@
 package com.myqtt.minpc.mqtt;
 
+import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 
+import android.content.res.Resources;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -14,10 +21,16 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 
+import android.text.SpannableString;
+import android.text.style.StyleSpan;
+import android.text.style.UnderlineSpan;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,9 +46,11 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.NetworkInterface;
 import java.util.Collections;
@@ -49,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     Button b ;
     Button c;
     private  String API_KEY ="api_key" ;
+    private String channel_url = "https://api.thingspeak.com/channels.json";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +106,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 MainActivity.this.startActivity(ii);
             }
         });
+        GetChannelList();
+        fetchJsonByUniqueId();
     }
 
     public void GetWifiMacAddress()
@@ -242,8 +260,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     {
         super.onRestart();
         connect();
-        //finish();
-        //startActivity(getIntent());
+        // finish();
+        // startActivity(getIntent());
     }
 
 //    public void printMessege(MqttAndroidClient client){
@@ -343,6 +361,101 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         };
         sendThread.start();
 
+    }
+
+    public void GetChannelList() {
+
+        Log.d("json_iot","");
+        Thread sendThread = new Thread() {
+
+            @SuppressLint("ResourceType")
+            public void run() {
+
+                OkHttpClientGet example = new OkHttpClientGet();
+                String response = null;
+                try {
+                    response = example.run("https://api.thingspeak.com/channels.json?api_key=ILA15VPFYBECOKAS");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                Log.d("GET_INFO",response);
+                // System.out.println(response);
+
+            //    RequestHandler rh = new RequestHandler();
+               // HashMap<String, String> param = new HashMap<String, String>();
+
+               // Populate the request parameters
+             //    param.put(API_KEY, "ILA15VPFYBECOKAS");
+               // param.put(KEY_BILL_ID, "");
+
+               // String result=rh.sendPostRequest(channel_url, param);
+
+                //pDialog.dismiss();
+
+
+
+            try {
+                 //JSONObject jsonObject = new JSONObject(response);// giving org.json.JSONArray cannot be converted to JSONObject
+                 JSONArray jsonarray = new JSONArray(response);
+                 //  JSONObject jsonObject = new JSONObject(response.substring(response.indexOf("{"), response.lastIndexOf("}") + 1));
+                 //  Log.d("channel_id",result);
+                 //  jsonObject = new JSONObject(response);
+                 //  JSONArray dataArray = jsonObject.getJSONArray("data");
+                for(int i=0; i < jsonarray.length(); i++) {
+                    JSONObject jsonobject = jsonarray.getJSONObject(i);
+                    String id       = jsonobject.getString("id");
+                    String name    = jsonobject.getString("name");
+                    String api_keys  = jsonobject.getString("api_keys");
+
+                    JSONArray jsonArray2 = new JSONArray(api_keys);
+                    for(int j=0;j<jsonArray2.length();j++){
+                        JSONObject jsonobject2 = jsonArray2.getJSONObject(j);
+                        String api_key = jsonobject2.getString("api_key");
+                        String write_flag = jsonobject2.getString("write_flag");
+                        Log.d("ranojan",api_key+" "+write_flag);
+                    }
+
+                }
+
+
+               } catch (JSONException e) {
+                  e.printStackTrace();
+                }
+           }
+  };
+
+        sendThread.start();
+
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    protected void fetchJsonByUniqueId(){
+        // to show the progressbar
+        // Log.d("my_info_id",mm_id);
+        // netQuantityPopUp=0;
+        // progbar.setVisibility(View.VISIBLE);
+        // showSimpleProgressDialog(this, "Loading...","Fetching Json",false);
+
+        new AsyncTask<Void, Void, String>(){
+            protected String doInBackground(Void[] params) {
+                String response="";
+                HashMap<String, String> map=new HashMap<>();
+                try {
+                    HttpRequest req = new HttpRequest(channel_url);
+                    //Populate the request parameters
+                    map.put(API_KEY, "ILA15VPFYBECOKAS");
+                    response = req.prepare(HttpRequest.Method.POST).withData(map).sendAndReadString();
+                } catch (Exception e) {
+                    response=e.getMessage();
+                }
+                return response;
+            }
+            protected void onPostExecute(String result) {
+                // do something with response
+                Log.d("my_info",result);
+                // onTaskUniqueIdCompleted(result,uniqueJsoncode);
+            }
+        }.execute();
     }
 
 }

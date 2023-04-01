@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 29
     defaultConfig {
-        applicationId "com.example.rashminpc.mqtttest"
+        applicationId "com.myqtt.minpc.mqtt"
         minSdkVersion 19
         targetSdkVersion 29
         versionCode 1
@@ -43,5 +43,12 @@ dependencies {
 
     implementation 'com.github.PhilJay:MPAndroidChart:v3.0.2'
     implementation 'com.google.android.material:material:1.0.0'
+    implementation("com.squareup.okhttp3:okhttp:4.10.0")
+// define a BOM and its version
+    implementation(platform("com.squareup.okhttp3:okhttp-bom:4.10.0"))
+
+    // define any required OkHttp artifacts without version
+    implementation("com.squareup.okhttp3:okhttp")
+    implementation("com.squareup.okhttp3:logging-interceptor")
 
 }

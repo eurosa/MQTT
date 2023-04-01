@@ -5,6 +5,9 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 import com.example.rashminpc.mqtttest.R;
 
@@ -16,13 +19,26 @@ public class WifiActivity extends AppCompatActivity {
         setContentView(R.layout.activity_wifi);
         // toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-
+        WebView myWebView =  findViewById(R.id.webView);
 
         // add back arrow to toolbar
         if (getSupportActionBar() != null){
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
+
+     //   myWebView.loadUrl("http://timxn.com");//http://192.168.0.1
+
+        WebSettings webSettings = myWebView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+        myWebView.loadUrl("http://192.168.0.1");
+
+       myWebView.setWebViewClient(new WebViewClient() {
+            public boolean shouldOverrideUrlLoading(WebView viewx, String urlx) {
+                viewx.loadUrl(urlx);
+                return false;
+            }
+        });
     }
 
     @Override
