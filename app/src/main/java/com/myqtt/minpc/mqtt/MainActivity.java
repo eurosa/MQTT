@@ -1,13 +1,9 @@
 package com.myqtt.minpc.mqtt;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 
-import android.content.res.Resources;
-import android.graphics.Color;
-import android.graphics.Typeface;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
@@ -15,29 +11,26 @@ import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 
-import android.text.SpannableString;
-import android.text.style.StyleSpan;
-import android.text.style.UnderlineSpan;
 import android.util.Log;
-import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.rashminpc.mqtttest.R;
 import com.google.android.material.navigation.NavigationView;
+import com.kyleduo.switchbutton.SwitchButton;
 
-import org.eclipse.paho.android.service.MqttAndroidClient;
+import info.mqtt.android.service.Ack;
+import info.mqtt.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
@@ -52,12 +45,15 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, NavigationView.OnNavigationItemSelectedListener{
     private static final String CHANNEL_NAME = "name";
     public DrawerLayout drawerLayout;
     public ActionBarDrawerToggle actionBarDrawerToggle;
@@ -65,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     Button c;
     private  String API_KEY ="api_key" ;
     private String channel_url = "https://api.thingspeak.com/channels.json";
-
+    private SwitchButton switch2;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,8 +91,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         b = (Button)findViewById(R.id.button);
         c = (Button)findViewById(R.id.button2);
         b.setOnClickListener(v -> {
-            Intent ii = new Intent(MainActivity.this,graphActivity.class);
-            MainActivity.this.startActivity(ii);
+     //       Intent ii = new Intent(MainActivity.this, GraphActivity.class);
+            //MainActivity.this.startActivity(ii);
         });
 
         c.setOnClickListener(new View.OnClickListener() {
@@ -106,8 +102,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 MainActivity.this.startActivity(ii);
             }
         });
-        GetChannelList();
-        fetchJsonByUniqueId();
+        try {
+            GetESP32MAC();
+            GetChannelList();
+        }catch (Exception ex){}
+        try {
+            fetchJsonByUniqueId();
+        }catch (Exception ex)
+        {
+
+        }
+
+        switch2 = findViewById(R.id.switch2);
+        switch2.setOnClickListener(this);
     }
 
     public void GetWifiMacAddress()
@@ -148,76 +155,98 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return "02:00:00:00:00:00";
     }
 
+    public void GetESP32MAC() throws SocketException, UnknownHostException {
+        String ipAddress = "192.168.1.100"; // replace with the IP address of your ESP32
+        InetAddress inetAddress = InetAddress.getByName("192.168.0.102");
+        NetworkInterface networkInterface = NetworkInterface.getByInetAddress(inetAddress);
+        byte[] macBytes = new byte[0];
+        try {
+            macBytes = networkInterface.getHardwareAddress();
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
+
+        if (macBytes != null) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < macBytes.length; i++) {
+                sb.append(String.format("%02X%s", macBytes[i], (i < macBytes.length - 1) ? ":" : ""));
+            }
+            String macAddress = sb.toString();
+            //Toast.makeText(getApplicationContext(),""+macAddress,Toast.LENGTH_LONG);
+            Log.d("ranojan mac ID","MAC Address: "+macAddress);
+            // use macAddress variable as the MAC address of your ESP32
+        } else {
+            // unable to get MAC address
+        }
+
+    }
+
     public void connect(){
 
         GetWifiMacAddress();
 
         String clientId ="KBUjEzIRCBsvCgcNCSwfHQ4"; MqttClient.generateClientId();
-        final MqttAndroidClient client =
-                new MqttAndroidClient(this.getApplicationContext(), "tcp://mqtt3.thingspeak.com:1883",//mqtt:// not working > tcp://working
-                        clientId);
+        final MqttAndroidClient client =  new MqttAndroidClient(getApplicationContext(), "tcp://mqtt3.thingspeak.com:1883", clientId, Ack.AUTO_ACK);
+            //    new MqttAndroidClient(this.getApplicationContext(), "tcp://mqtt3.thingspeak.com:1883",//mqtt:// not working > tcp://working
+              //          clientId);
 
         MqttConnectOptions options = new MqttConnectOptions();
         options.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1);
         options.setCleanSession(false);
         options.setUserName("KBUjEzIRCBsvCgcNCSwfHQ4");
         options.setPassword("syDJo4Ad/oVb8rjbSAuf8nQE".toCharArray());
-        try {
-            IMqttToken token = client.connect(options);
-            //IMqttToken token = client.connect();
-            token.setActionCallback(new IMqttActionListener() {
-                @Override
-                public void onSuccess(IMqttToken asyncActionToken) {
-                    // We are connected
-                    Log.d("file", "onSuccess");
-                    //publish(client,"payloadd");
-                    subscribe(client,"channels/2071049/subscribe/fields/field1");
-                    publish(client, String.valueOf(20));
-                 //   subscribe(client,"channels/2071049/fields/field1");
-                    client.setCallback(new MqttCallback() {
-                        TextView tt = (TextView) findViewById(R.id.tt);
-                        TextView th = (TextView) findViewById(R.id.th);
-                        @Override
-                        public void connectionLost(Throwable cause) {
-                            Log.d("file", "connectionLost");
-                            Log.d("file 2","some question has been solved");
-                            Log.d("file 3","go for dinner system ready for your unbreakable");
+        IMqttToken token = client.connect(options);
+        //IMqttToken token = client.connect();
+        token.setActionCallback(new IMqttActionListener() {
+            @Override
+            public void onSuccess(IMqttToken asyncActionToken) {
+                // We are connected
+                Log.d("file", "onSuccess");
+                //publish(client,"payloadd");
+                subscribe(client,"channels/2071049/subscribe/fields/field3");
+                publish(client, String.valueOf(45));
+             //   subscribe(client,"channels/2071049/fields/field1");
+                client.setCallback(new MqttCallback() {
+                    TextView tt = (TextView) findViewById(R.id.tt);
+                    TextView th = (TextView) findViewById(R.id.th);
+                    @Override
+                    public void connectionLost(Throwable cause) {
+                        Log.d("file", "connectionLost");
+                        Log.d("file 2","some question has been solved");
+                        Log.d("file 3","go for dinner system ready for your unbreakable");
+                    }
+
+                    @Override
+                    public void messageArrived(String topic, MqttMessage message) throws Exception {
+                        Log.d("file 1", message.toString());
+
+                        if (topic.equals("channels/2071049/subscribe/fields/field3")){
+                            tt.setText(message.toString());
                         }
 
-                        @Override
-                        public void messageArrived(String topic, MqttMessage message) throws Exception {
-                            Log.d("file 1", message.toString());
-
-                            if (topic.equals("channels/2071049/subscribe/fields/field1")){
-                                tt.setText(message.toString());
-                            }
-
-                            if (topic.equals("channels/2071049/fields/field1")){
-                                th.setText(message.toString());
-                            }
-
+                        if (topic.equals("channels/2071049/subscribe/fields/field3")){
+                            th.setText(message.toString());
                         }
 
-                        @Override
-                        public void deliveryComplete(IMqttDeliveryToken token) {
+                    }
 
-                        }
-                    });
+                    @Override
+                    public void deliveryComplete(IMqttDeliveryToken token) {
+
+                    }
+                });
 
 
-                }
+            }
 
-                @Override
-                public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                    // Something went wrong e.g. connection timeout or firewall problems
-                    Log.d("file", "onFailure");
-                    // This for failure to share this heavy duty onFailure to solve the problem to overcome this problem my goodness
+            @Override
+            public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+                // Something went wrong e.g. connection timeout or firewall problems
+                Log.d("file", "onFailure");
+                // This for failure to share this heavy duty onFailure to solve the problem to overcome this problem my goodness
 
-                }
-            });
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }
+            }
+        });
     }
 
     public void publish(MqttAndroidClient client, String payload){
@@ -227,32 +256,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             encodedPayload = payload.getBytes("UTF-8");
             MqttMessage message = new MqttMessage(encodedPayload);
             client.publish(topic, message);
-        } catch (UnsupportedEncodingException | MqttException e) {
+        } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
     }
 
     public void subscribe(MqttAndroidClient client , String topic){
         int qos = 1;
-        try {
-            IMqttToken subToken = client.subscribe(topic, qos);
-            subToken.setActionCallback(new IMqttActionListener() {
+        IMqttToken subToken = client.subscribe(topic, qos);
+        subToken.setActionCallback(new IMqttActionListener() {
 
-                @Override
-                public void onSuccess(IMqttToken asyncActionToken) {
-                    // The message was published
-                }
+            @Override
+            public void onSuccess(IMqttToken asyncActionToken) {
+                // The message was published
+            }
 
-                @Override
-                public void onFailure(IMqttToken asyncActionToken,
-                                      Throwable exception) {
-                    // The subscription could not be performed, maybe the user was not
-                    // Authorized to subscribe on the specified topic e.g. using wildcards
-                }
-            });
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }
+            @Override
+            public void onFailure(IMqttToken asyncActionToken,
+                                  Throwable exception) {
+                // The subscription could not be performed, maybe the user was not
+                // Authorized to subscribe on the specified topic e.g. using wildcards
+            }
+        });
     }
 
     @Override
@@ -378,7 +403,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                Log.d("GET_INFO",response);
+                try {
+                    Log.d("GET_INFO", response);
+                }catch (Exception ex){}
                 // System.out.println(response);
 
             //    RequestHandler rh = new RequestHandler();
@@ -396,27 +423,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             try {
                  //JSONObject jsonObject = new JSONObject(response);// giving org.json.JSONArray cannot be converted to JSONObject
-                 JSONArray jsonarray = new JSONArray(response);
-                 //  JSONObject jsonObject = new JSONObject(response.substring(response.indexOf("{"), response.lastIndexOf("}") + 1));
-                 //  Log.d("channel_id",result);
-                 //  jsonObject = new JSONObject(response);
-                 //  JSONArray dataArray = jsonObject.getJSONArray("data");
-                for(int i=0; i < jsonarray.length(); i++) {
-                    JSONObject jsonobject = jsonarray.getJSONObject(i);
-                    String id       = jsonobject.getString("id");
-                    String name    = jsonobject.getString("name");
-                    String api_keys  = jsonobject.getString("api_keys");
+                if(response!=null) {
+                    JSONArray jsonarray = new JSONArray(response);
+                    //  JSONObject jsonObject = new JSONObject(response.substring(response.indexOf("{"), response.lastIndexOf("}") + 1));
+                    //  Log.d("channel_id",result);
+                    //  jsonObject = new JSONObject(response);
+                    //  JSONArray dataArray = jsonObject.getJSONArray("data");
+                    for (int i = 0; i < jsonarray.length(); i++) {
+                        JSONObject jsonobject = jsonarray.getJSONObject(i);
+                        String id = jsonobject.getString("id");
+                        String name = jsonobject.getString("name");
+                        String api_keys = jsonobject.getString("api_keys");
 
-                    JSONArray jsonArray2 = new JSONArray(api_keys);
-                    for(int j=0;j<jsonArray2.length();j++){
-                        JSONObject jsonobject2 = jsonArray2.getJSONObject(j);
-                        String api_key = jsonobject2.getString("api_key");
-                        String write_flag = jsonobject2.getString("write_flag");
-                        Log.d("ranojan",api_key+" "+write_flag);
+                        JSONArray jsonArray2 = new JSONArray(api_keys);
+                        for (int j = 0; j < jsonArray2.length(); j++) {
+                            JSONObject jsonobject2 = jsonArray2.getJSONObject(j);
+                            String api_key = jsonobject2.getString("api_key");
+                            String write_flag = jsonobject2.getString("write_flag");
+                            Log.d("ranojan", api_key + " " + write_flag);
+                        }
+
                     }
-
                 }
-
 
                } catch (JSONException e) {
                   e.printStackTrace();
@@ -458,6 +486,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }.execute();
     }
 
+    @Override
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void onClick(View v) {
+        switch (v.getId() /*to get clicked view id**/) {
+            case R.id.switch2:
+                switch2(v);
+                break;
+            default:
+                break;
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void switch2(View v){
+        SwitchButton b = (SwitchButton)v;
+        Log.d("ranojan switch click",""+b.isChecked());
+            if(b.isChecked()) {
+                 switch2.setThumbColorRes(R.color.red);
+                 // Toast.makeText(getApplicationContext(), "" + v.getStateDescription(), Toast.LENGTH_SHORT).show();
+            }else{
+
+                switch2.setThumbColorRes(R.color.limeGreen);
+            }
+
+    }
 }
 
 

@@ -21,13 +21,13 @@ public class WifiActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         WebView myWebView =  findViewById(R.id.webView);
 
-        // add back arrow to toolbar
+        // Add back arrow to toolbar
         if (getSupportActionBar() != null){
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
 
-     //   myWebView.loadUrl("http://timxn.com");//http://192.168.0.1
+        //   myWebView.loadUrl("http://timxn.com");//http://192.168.0.1
 
         WebSettings webSettings = myWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);

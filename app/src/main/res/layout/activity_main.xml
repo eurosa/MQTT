@@ -70,11 +70,33 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/switchLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/humidityLayout">
+        <com.kyleduo.switchbutton.SwitchButton
+            android:id="@+id/switch2"
+            style="@style/SwitchButtonStyle"
+            android:layout_width="150dp"
+            android:layout_height="51dp"
+            android:textColor="@color/custom_text_state_color"
+            android:textSize="16sp"
+            app:kswTextAdjust="-2dp"
+            app:kswTextExtra="17dp"
+            app:kswThumbColor ="@color/limeGreen"
+            app:kswBackColor="@color/whiteColor"
+            app:kswTextOff="OFF"
+            app:kswTextOn="ON"
+
+            />
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/graphLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/humidityLayout"
-        android:layout_marginTop="-2dp"
+        android:layout_below="@id/switchLayout"
+        android:layout_marginTop="2dp"
         android:orientation="vertical">
 
         <Button
@@ -83,7 +105,7 @@
             android:layout_height="91dp"
             android:layout_marginStart="20dp"
             android:layout_marginTop="100dp"
-            android:layout_marginBottom="100dp"
+            android:layout_marginBottom="10dp"
             android:fontFamily="serif-monospace"
             android:gravity="center"
             android:text="GRAPH-Temp"

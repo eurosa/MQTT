@@ -19,11 +19,11 @@ import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
  * Created by Rashmin PC on 3/16/2018.
  */
 
-public class chartHelper implements OnChartValueSelectedListener {
+public class ChartHelper implements OnChartValueSelectedListener {
 
     private LineChart mChart;
 
-    public chartHelper(LineChart chart) {
+    public ChartHelper(LineChart chart) {
         this.mChart = chart;
         mChart.setOnChartValueSelectedListener(this);
 

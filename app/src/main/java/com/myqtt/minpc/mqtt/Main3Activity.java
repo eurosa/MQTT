@@ -7,7 +7,8 @@ import android.util.Log;
 import com.example.rashminpc.mqtttest.R;
 import com.github.mikephil.charting.charts.LineChart;
 
-import org.eclipse.paho.android.service.MqttAndroidClient;
+import info.mqtt.android.service.Ack;
+import info.mqtt.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
@@ -21,79 +22,74 @@ import java.io.UnsupportedEncodingException;
 
 public class Main3Activity extends AppCompatActivity {
 
-    chartHelper mChart;
+    ChartHelper mChart;
     LineChart chart;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main3);
         chart = (LineChart) findViewById(R.id.chart);
-        mChart = new chartHelper(chart);
+        mChart = new ChartHelper(chart);
         connect();
     }
 
 
     public void connect(){
         String clientId = MqttClient.generateClientId();
-        final MqttAndroidClient client =
-                new MqttAndroidClient(this.getApplicationContext(), "tcp://m12.cloudmqtt.com:17389",
-                        clientId);
+        final MqttAndroidClient client = new MqttAndroidClient(getApplicationContext(), "tcp://m12.cloudmqtt.com:17389", clientId, Ack.AUTO_ACK);
+
 
         MqttConnectOptions options = new MqttConnectOptions();
         options.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1);
         options.setCleanSession(false);
         options.setUserName("snyhhyzw");
         options.setPassword("LpZK32PEBN5q".toCharArray());
-        try {
-            IMqttToken token = client.connect(options);
-            //IMqttToken token = client.connect();
-            token.setActionCallback(new IMqttActionListener() {
-                @Override
-                public void onSuccess(IMqttToken asyncActionToken) {
-                    // We are connected
-                    Log.d("file", "onSuccess");
-                    //publish(client,"payloadd");
-                    subscribe(client,"dht");
-                    subscribe(client,"bmp");
-                    client.setCallback(new MqttCallback() {
-                        @Override
-                        public void connectionLost(Throwable cause) {
+        IMqttToken token = client.connect(options);
+        //IMqttToken token = client.connect();
+        token.setActionCallback(new IMqttActionListener() {
+            @Override
+            public void onSuccess(IMqttToken asyncActionToken) {
+                // We are connected
+                Log.d("file", "onSuccess");
+                //publish(client,"payloadd");
+                subscribe(client,"dht");
+                subscribe(client,"bmp");
+                client.setCallback(new MqttCallback() {
+                    @Override
+                    public void connectionLost(Throwable cause) {
+
+                    }
+
+                    @Override
+                    public void messageArrived(String topic, MqttMessage message) throws Exception {
+                        Log.d("file", message.toString());
+
+                        if (topic.equals("dht")){
 
                         }
 
-                        @Override
-                        public void messageArrived(String topic, MqttMessage message) throws Exception {
-                            Log.d("file", message.toString());
-
-                            if (topic.equals("dht")){
-
-                            }
-
-                            if (topic.equals("bmp")){
-                                mChart.addEntry(Float.valueOf(message.toString()));
-                            }
-
+                        if (topic.equals("bmp")){
+                            mChart.addEntry(Float.valueOf(message.toString()));
                         }
 
-                        @Override
-                        public void deliveryComplete(IMqttDeliveryToken token) {
+                    }
 
-                        }
-                    });
+                    @Override
+                    public void deliveryComplete(IMqttDeliveryToken token) {
+
+                    }
+                });
 
 
-                }
+            }
 
-                @Override
-                public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                    // Something went wrong e.g. connection timeout or firewall problems
-                    Log.d("file", "onFailure");
+            @Override
+            public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+                // Something went wrong e.g. connection timeout or firewall problems
+                Log.d("file", "onFailure");
 
-                }
-            });
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }
+            }
+        });
     }
 
     public void publish(MqttAndroidClient client, String payload){
@@ -103,33 +99,29 @@ public class Main3Activity extends AppCompatActivity {
             encodedPayload = payload.getBytes("UTF-8");
             MqttMessage message = new MqttMessage(encodedPayload);
             client.publish(topic, message);
-        } catch (UnsupportedEncodingException | MqttException e) {
+        } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
     }
 
     public void subscribe(MqttAndroidClient client , String topic){
         int qos = 1;
-        try {
-            IMqttToken subToken = client.subscribe(topic, qos);
-            subToken.setActionCallback(new IMqttActionListener() {
+        IMqttToken subToken = client.subscribe(topic, qos);
+        subToken.setActionCallback(new IMqttActionListener() {
 
-                @Override
-                public void onSuccess(IMqttToken asyncActionToken) {
-                    // The message was published
-                }
+            @Override
+            public void onSuccess(IMqttToken asyncActionToken) {
+                // The message was published
+            }
 
-                @Override
-                public void onFailure(IMqttToken asyncActionToken,
-                                      Throwable exception) {
-                    // The subscription could not be performed, maybe the user was not
-                    // authorized to subscribe on the specified topic e.g. using wildcards
+            @Override
+            public void onFailure(IMqttToken asyncActionToken,
+                                  Throwable exception) {
+                // The subscription could not be performed, maybe the user was not
+                // authorized to subscribe on the specified topic e.g. using wildcards
 
-                }
-            });
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }
+            }
+        });
     }
 
 

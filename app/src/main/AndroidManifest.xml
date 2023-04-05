@@ -38,7 +38,6 @@
         <service android:name="org.eclipse.paho.android.service.MqttService" />
 
         <activity android:name="com.myqtt.minpc.mqtt.MainActivity" />
-        <activity android:name="com.myqtt.minpc.mqtt.graphActivity" />
         <activity android:name="com.myqtt.minpc.mqtt.Main3Activity" />
     </application>
 
