@@ -214,7 +214,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
         // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        String clientId = "ESP32_Test";//"iotconsole-be928d1a-3b3e-4370-aaa5-5fb498d652b2";
+        String clientId = "iotconsole-be928d1a-3b3e-4370-aaa5-5fb498d652b2";//"iotconsole-be928d1a-3b3e-4370-aaa5-5fb498d652b2";
         String broker = "tcp://a2w5xcmt7e0hk6-ats.iot.us-east-1.amazonaws.com:1883";//"tcp://localhost:1883";8883
         String topicName = "topic/test_topic/esp32";
         int qos = 0;
@@ -224,7 +224,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
            // SubscribeToAWS(broker,clientId,topicName, qos);
         //} catch (MqttException e) {
          //   e.printStackTrace();
-       // }
+      //  }
       /*  try {
              mqttClient = new MqttClient(broker,clientId);
 
