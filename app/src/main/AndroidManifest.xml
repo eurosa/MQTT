@@ -35,10 +35,9 @@
             </intent-filter>
         </activity>
 
-        <service android:name="org.eclipse.paho.android.service.MqttService" />
+        <activity android:name="com.myqtt.minpc.mqtt.PubSubActivity" />
 
         <activity android:name="com.myqtt.minpc.mqtt.MainActivity" />
-        <activity android:name="com.myqtt.minpc.mqtt.Main3Activity" />
     </application>
 
 </manifest>

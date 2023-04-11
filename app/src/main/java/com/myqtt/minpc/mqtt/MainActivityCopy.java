@@ -3,19 +3,20 @@ package com.myqtt.minpc.mqtt;
 
 //import static com.github.mikephil.charting.charts.Chart.LOG_TAG;
 
-import static org.eclipse.paho.android.service.MqttAndroidClient.*;
-import static org.eclipse.paho.client.mqttv3.MqttConnectOptions.MQTT_VERSION_3_1;
-import static java.nio.ByteBuffer.*;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -24,98 +25,28 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-
-import android.util.Log;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
-import android.widget.Toast;
-
-
-
-//import com.amazonaws.services.iot.client.AWSIotException;
-//import com.amazonaws.services.iot.client.AWSIotMqttClient;
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
-import com.amazonaws.mobile.client.AWSMobileClient;
 import com.amazonaws.mobileconnectors.iot.AWSIotMqttClientStatusCallback;
 import com.amazonaws.mobileconnectors.iot.AWSIotMqttManager;
-import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
-//import com.amazonaws.services.iot.client.AWSIotException;
-//import com.amazonaws.services.iot.client.AWSIotMqttClient;
-import com.amazonaws.services.cognitoidentity.AmazonCognitoIdentity;
-import com.amazonaws.services.cognitoidentity.AmazonCognitoIdentityClient;
-import com.amazonaws.services.cognitoidentity.model.GetIdRequest;
-import com.amazonaws.services.cognitoidentity.model.GetIdResult;
-import com.amazonaws.services.iot.AWSIotClient;
-import com.amazonaws.services.iot.model.AttachPolicyRequest;
-import com.amazonaws.services.iot.model.AttachPrincipalPolicyRequest;
-import com.amazonaws.util.IOUtils;
 import com.example.rashminpc.mqtttest.R;
 import com.google.android.material.navigation.NavigationView;
 import com.kyleduo.switchbutton.SwitchButton;
 
-
-import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openssl.PEMKeyPair;
-import org.bouncycastle.openssl.PEMParser;
-import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
-import org.bouncycastle.util.io.pem.PemObject;
-import org.bouncycastle.util.io.pem.PemReader;
-import org.eclipse.paho.android.service.MqttAndroidClient;
-import org.eclipse.paho.client.mqttv3.IMqttActionListener;
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.IMqttToken;
-import org.eclipse.paho.client.mqttv3.MqttCallback;
-import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.eclipse.paho.client.mqttv3.MqttTopic;
-import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
-import java.security.GeneralSecurityException;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.Security;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.regex.Pattern;
 
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManagerFactory;
-
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, NavigationView.OnNavigationItemSelectedListener{
+public class MainActivityCopy extends AppCompatActivity implements View.OnClickListener, NavigationView.OnNavigationItemSelectedListener{
     private static final String CHANNEL_NAME = "name";
     public DrawerLayout drawerLayout;
     public ActionBarDrawerToggle actionBarDrawerToggle;
@@ -131,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static final String CUSTOMER_SPECIFIC_ENDPOINT = "a2w5xcmt7e0hk6-ats.iot.us-east-1.amazonaws.com";
     // Cognito pool ID. For this app, pool needs to be unauthenticated pool with
     // AWS IoT permissions.
-    private static final String COGNITO_POOL_ID ="us-east-1:bb5680ba-e40d-4454-be3c-ddaa5231eb85";//"us-east-1:d1a86c61-c800-4838-9033-43d4a49c7ae5";// "us-west-2_iQ1FI8tfj";
+    private static final String COGNITO_POOL_ID ="us-east-1:d1a86c61-c800-4838-9033-43d4a49c7ae5";// "us-west-2_iQ1FI8tfj";
     // Name of the AWS IoT policy to attach to a newly created certificate
     private static final String AWS_IOT_POLICY_NAME = "PMQTT";
 
@@ -145,17 +76,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static final String CERTIFICATE_ID = "default";
     CognitoCachingCredentialsProvider credentialsProvider;
     AWSIotMqttManager mqttManager;
-    private MqttClient mqttClient;
-    private MqttConnectOptions options;
-    private MqttAndroidClient mqttAndroidClient;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         tvStatus = (TextView) findViewById(R.id.tt);
-
-        // [cloudshell-user@ip-10-2-125-33 ~]$ aws iot attach-principal-policy --policy-name 'ESP32_Test_Policy' --principal 'us-east-1:d1a86c61-c800-4838-9033-43d4a49c7ae5'
         //++++++++++++++++++++++++++++++++++ Navigation Drawer +++++++++++++++++++++++++++++++++++++
         // drawer layout instance to toggle the menu icon to open
         // drawer and back button to close drawer
@@ -177,8 +102,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
       // try {
-            //connect1();
-       // connect1();
+            connect1();
        //} catch (AWSIotException e) {
       //     e.printStackTrace();
        // }
@@ -211,154 +135,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         switch2 = findViewById(R.id.switch2);
         switch2.setOnClickListener(this);
-
-
-        // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        String clientId = "ESP32_Test";//"iotconsole-be928d1a-3b3e-4370-aaa5-5fb498d652b2";
-        String broker = "tcp://a2w5xcmt7e0hk6-ats.iot.us-east-1.amazonaws.com:1883";//"tcp://localhost:1883";8883
-        String topicName = "topic/test_topic/esp32";
-        int qos = 0;
-
-
-        //try {
-           // SubscribeToAWS(broker,clientId,topicName, qos);
-        //} catch (MqttException e) {
-         //   e.printStackTrace();
-       // }
-      /*  try {
-             mqttClient = new MqttClient(broker,clientId);
-
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }*/
-
-        //Mqtt ConnectOptions is used to set the additional features to mqtt message
-
-
-
-
-       // SSLSocketFactory sslSocketFactory = ...
-        //options.setSocketFactory(sslSocketFactory);
-
-        try {
-            InputStream caCrtFile = getApplicationContext().getResources().openRawResource(R.raw.aws_root_ca_pem);
-            InputStream crtFile = getApplicationContext().getResources().openRawResource(R.raw.certificate_pem_crt);
-            InputStream keyFile = getApplicationContext().getResources().openRawResource(R.raw.private_pem_key);
-
-            JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
-            options = new MqttConnectOptions();
-            options.setCleanSession(true); //no persistent session
-            options.setKeepAliveInterval(1000);
-           // options.setAutomaticReconnect(true);
-            MqttMessage message = new MqttMessage("Ed Sheeran".getBytes());
-            message.setQos(qos);     //sets qos level 1
-            message.setRetained(true); //sets retained message
-            options.setMqttVersion(MQTT_VERSION_3_1);
-           // Log.d("mypath", String.valueOf(getPrivateKey()));
-            options.setSocketFactory(getSocketFactory(caCrtFile, crtFile, keyFile, ""));
-            mqttClient = new MqttClient(broker,clientId);
-            // mqttClient = new MqttClient(broker,clientId,new MemoryPersistence());
-
-           // mqttAndroidClient = new MqttAndroidClient(getApplicationContext(), broker, clientId,
-             //       new MemoryPersistence(), MqttAndroidClient.Ack.AUTO_ACK);
-
-            mqttClient.connect(options); //connects the broker with connect options
-
-            MqttTopic topic2 = mqttClient.getTopic(topicName);
-
-            topic2.publish(message);    // publishes the message to the topic(test/topic)
-        } catch (Exception e) {
-
-            Log.d("Message_sent",e.toString()+" "+e.getCause()+" "+e.getLocalizedMessage());
-            e.printStackTrace();
-        }
-
-     //++++++===========================================================================================
-    }
-
-    public void SubscribeToAWS(String broker,String clientId,String topic, int qos) throws MqttException {
-        try{
-
-        MemoryPersistence persistence = new MemoryPersistence();
-        MqttClient sampleClient = new MqttClient(broker, clientId, persistence);
-
-            InputStream caCrtFile = getApplicationContext().getResources().openRawResource(R.raw.aws_root_ca_pem);
-            InputStream crtFile = getApplicationContext().getResources().openRawResource(R.raw.certificate_pem_crt);
-            InputStream keyFile = getApplicationContext().getResources().openRawResource(R.raw.private_pem_key);
-
-
-            MqttConnectOptions connectOptions = new MqttConnectOptions();
-            connectOptions.setCleanSession(true); //no persistent session
-           // connectOptions.setKeepAliveInterval(1000);
-           // connectOptions.setSocketFactory(getSocketFactory(caCrtFile, crtFile, keyFile, ""));
- ;
-        connectOptions.setCleanSession(true);
-        Log.d("Connecting to broker: ", broker);
-        sampleClient.connect(connectOptions);
-        Log.d("Connected","connected");
-        sampleClient.setCallback(new MqttCallback() {
-            @Override
-            public void connectionLost(Throwable throwable) {
-                try {
-                    sampleClient.subscribe(topic, qos);
-                } catch (MqttException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void messageArrived(String topic, MqttMessage message) throws Exception {
-
-            }
-
-            @Override
-            public void deliveryComplete(IMqttDeliveryToken token) {
-
-            }
-        });
-       }catch (MqttException me)
-
-            {
-
-                me.printStackTrace();
-                me.printStackTrace();
-                System.exit(1);
-            } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    public static PrivateKey parsePrivateKey(String privateKey) throws Exception {
-
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("-----BEGIN PRIVATE KEY-----\n");
-        sb.append(privateKey);/* www  .  j a v a  2  s .c o m*/
-
-        if (!privateKey.endsWith("\n")) {
-            sb.append("\n");
-        }
-
-        sb.append("-----END PRIVATE KEY-----");
-
-        PEMParser pemParser = new PEMParser(new StringReader(sb.toString()));
-
-        JcaPEMKeyConverter jcaPEMKeyConverter = new JcaPEMKeyConverter();
-
-        return jcaPEMKeyConverter.getPrivateKey((PrivateKeyInfo) pemParser.readObject());
-    }
-
-    public static PrivateKey loadKey(String file) throws IOException {
-        PEMParser parser = new PEMParser(new FileReader(file));
-        try {/*w ww  .jav  a2 s. c om*/
-            PEMKeyPair pemObject = (PEMKeyPair) parser.readObject();
-            PrivateKeyInfo info = pemObject.getPrivateKeyInfo();
-            JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
-            return converter.getPrivateKey(info);
-        } finally {
-            //IOUtils.closeQuietly(parser);
-        }
     }
 
     public void GetWifiMacAddress()
@@ -425,35 +201,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    public void connect2(){
-
-        // Initialize the AWSIotMqttManager with the configuration
-        AWSIotMqttManager mqttManager = new AWSIotMqttManager(
-                "iotconsole-54a71cad-495b-4009-8a41-fa7ef1f580db",
-                "a2w5xcmt7e0hk6-ats.iot.us-east-1.amazonaws.com");
-
-        //AWSMobileClient.getInstance().getIdentityId();
-
-        AttachPolicyRequest attachPolicyReq = new AttachPolicyRequest();
-        attachPolicyReq.setPolicyName("ESP32_Test_Policy"); // name of your IOT AWS policy
-        attachPolicyReq.setTarget(AWSMobileClient.getInstance().getIdentityId());
-        AWSIotClient mIotAndroidClient = new AWSIotClient(AWSMobileClient.getInstance());
-        mIotAndroidClient.setRegion(Region.getRegion(Regions.US_EAST_1)); // name of your IoT Region such as "us-east-1"
-        mIotAndroidClient.attachPolicy(attachPolicyReq);
-
-        credentialsProvider = new CognitoCachingCredentialsProvider(
-                getApplicationContext(), // context
-                COGNITO_POOL_ID, // Identity Pool ID
-                Regions.US_EAST_1 // Region
-        );
-
-        }
-
-
     public void connect1()  {
 
         String clientEndpoint = "a2w5xcmt7e0hk6-ats.iot.us-east-1.amazonaws.com";
-        String clientId ="iotconsole-54a71cad-495b-4009-8a41-fa7ef1f580db2";
+        String clientId ="iotconsole-54a71cad-495b-4009-8a41-fa7ef1f580db";
         String certificateFile = "/my/path/XXXX-certificate.pem.crt";
         String privateKeyFile = "/my/path/XXXXX-private.pem.key";
 
@@ -464,83 +215,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Regions.US_EAST_1 // Region
         );
 
-        /*
-
-        -----BEGIN PUBLIC KEY-----
-MIICITANBgkqhkiG9w0BAQEFAAOCAg4AMIICCQKCAgB+quMAbV3OWhX5NejBopv0
-5Zlp4YiaCMYN3nhjWm3TICmRFO1VKJVN8lmvc50iCEougCEK/qF70efDgf5msDHc
-s2dj2Ql/VR7mbJc3MI85JDrcMZbJaiDrgU/kXtZqq+CbNSVBJ9XGjsk5Hs8pwe2o
-SSNHXFyMv/o3D9sX2gfXePev9BHMzEBBBG5JXNMpjwyFzqm2q2jTc9OYGTqOuI3f
-dU4vSK1Xbb2odWvh1pMC08zeDWqzcooyDdzY0YvCJYzEej3igm2pHaKVieB+fgbI
-5je4oQAEUvXV7IDb6Yu0ovIkIha33NaBgOq6SCvecOU9nQxrUQc/mW3VrZ7Hpct4
-NJUGtqWhY9chUmsjhOdo6dBHB12251iU0Y2Lwc0BVBCwY++S0Upwk++J6Dg71kHV
-FAF5Y4BUIRiLDAa2xKetCV0bvGS6Fp8ZPWuN5rOIvAyES7zuSIA5tihCnmTcz04n
-VC4djJUyvxaMYSCQWctjmK/MXkkB53LeFw1KTXMugMHZcxm/ZvsrM62XUbCK2Lg5
-3RKE8xNK1zqd4LmylzDDTefXF6twx35+TFZdsjKXwwqTRlBieNl2zy/cTn/UACtZ
-pD2ZlOwuTRtNKpdxj9iqH2kfNQEZM/9t+MOsUDhmVQXMqX6In3FInbW0q1D7RBDe
-1kKiSKzjxs90+wPGoFjO6QIDAQAB
------END PUBLIC KEY-----
-
------BEGIN RSA PRIVATE KEY-----
-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
------END RSA PRIVATE KEY-----
-https://cryptotools.net/rsagen
-        * */
-
-        /* AttachPolicyRequest attachPolicyReq = new AttachPolicyRequest();
-        attachPolicyReq.setPolicyName("ESP32_Test_Policy"); // name of your IOT AWS policy
-        attachPolicyReq.setTarget(AWSMobileClient.getInstance().getIdentityId());
-        AWSIotClient mIotAndroidClient = new AWSIotClient(AWSMobileClient.getInstance());
-        mIotAndroidClient.setRegion(Region.getRegion(Regions.US_EAST_1)); // name of your IoT Region such as "us-east-1"
-        mIotAndroidClient.attachPolicy(attachPolicyReq);*/
 
         // MQTT Client
         mqttManager = new AWSIotMqttManager(clientId, clientEndpoint);
@@ -1043,110 +717,6 @@ https://cryptotools.net/rsagen
             }
 
     }
-
-
-    public  SSLSocketFactory getSocketFactory(InputStream caCrtFile, InputStream crtFile, InputStream keyFile,
-                                                    String password) throws Exception {
-       // Security.addProvider(new BouncyCastleProvider());
-        Security.removeProvider("BC");
-        Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
-        Security.addProvider(new BouncyCastleProvider());
-        // load CA certificate
-        X509Certificate caCert = null;
-
-        BufferedInputStream bis = new BufferedInputStream(caCrtFile);
-        CertificateFactory cf = CertificateFactory.getInstance("X.509");
-
-        while (bis.available() > 0) {
-            caCert = (X509Certificate) cf.generateCertificate(bis);
-        }
-
-        // load client certificate
-        bis = new BufferedInputStream(crtFile);
-        X509Certificate cert = null;
-        while (bis.available() > 0) {
-            cert = (X509Certificate) cf.generateCertificate(bis);
-        }
-
-        // load client private cert
-        PEMParser pemParser = new PEMParser(new InputStreamReader(keyFile));
-        Object object = pemParser.readObject();
-        JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
-        KeyPair key = converter.getKeyPair((PEMKeyPair) object);
-
-        KeyStore caKs = KeyStore.getInstance(KeyStore.getDefaultType());
-        caKs.load(null, null);
-        caKs.setCertificateEntry("cert-certificate", caCert);
-        TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-        tmf.init(caKs);
-
-        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-        ks.load(null, null);
-        ks.setCertificateEntry("certificate", cert);
-        ks.setKeyEntry("private-cert", key.getPrivate(), password.toCharArray(),
-                new java.security.cert.Certificate[]{cert});
-        KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-        kmf.init(ks, password.toCharArray());
-
-        SSLContext context = SSLContext.getInstance("TLSv1.2");
-        context.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
-
-        return context.getSocketFactory();
-    }
-
-    public PrivateKey loadPrivateKey(InputStream privateKeyIn) throws IOException, GeneralSecurityException {
-
-        //need the full file - org.apache.commons.io.IOUtils is handy
-        byte[] fullFileAsBytes = IOUtils.toByteArray( privateKeyIn );
-        //remember this is supposed to be a text source with the BEGIN/END and base64 in the middle of the file
-        String fullFileAsString = new String(fullFileAsBytes);
-      //  Log.d("Message_sent encoded",fullFileAsString);
-        //nifty regular expression to extract out between BEGIN/END
-        Pattern parse = Pattern.compile("(?m)(?s)^---*BEGIN.*---*$(.*)^---*END.*---*$.*");
-        String encoded = parse.matcher(fullFileAsString).replaceFirst("$1");
-
-        //decode the Base64 string
-        byte[] keyDecoded = new byte[0];
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            keyDecoded = Base64.getMimeDecoder().decode(encoded);
-        }
-
-        //for my example, the source is in common PKCS#8 format
-        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyDecoded);
-
-        //from there we can use the KeyFactor to generate
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        PrivateKey privateKey = keyFactory.generatePrivate(keySpec);
-
-        return privateKey;
-    }
-    public  PrivateKey getPrivateKey() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
-        KeyFactory factory = KeyFactory.getInstance("RSA");
-        File file = new File("android.resource://" + getPackageName() + "/" + R.raw.private_pem_key);
-        try (FileReader keyReader = new FileReader(file); PemReader pemReader = new PemReader(keyReader)) {
-            PemObject pemObject = pemReader.readPemObject();
-            byte[] content = pemObject.getContent();
-            PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(content);
-            PrivateKey privateKey = factory.generatePrivate(privateKeySpec);
-            return privateKey;
-        }
-    }
-
-    public PrivateKey getPrivateKeyObject(InputStream privateKey)
-    {
-        PrivateKey privateKeyObject = null;
-        byte[] privateKeyBytes;
-        try {
-            privateKeyBytes = IOUtils.toByteArray(privateKey);
-            PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
-            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-            privateKeyObject = keyFactory.generatePrivate(privateKeySpec);
-        } catch(Exception e){
-            e.printStackTrace();
-        }
-        return privateKeyObject;
-    }
-
 }
 
 
