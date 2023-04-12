@@ -68,9 +68,11 @@ import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
+import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
@@ -108,6 +110,7 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import javax.net.ssl.KeyManagerFactory;
@@ -213,65 +216,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch2.setOnClickListener(this);
 
 
-        // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        String clientId = "iotconsole-be928d1a-3b3e-4370-aaa5-5fb498d652b2";//"iotconsole-be928d1a-3b3e-4370-aaa5-5fb498d652b2";
-        String broker = "tcp://a2w5xcmt7e0hk6-ats.iot.us-east-1.amazonaws.com:1883";//"tcp://localhost:1883";8883
-        String topicName = "topic/test_topic/esp32";
-        int qos = 0;
 
-
-        //try {
-           // SubscribeToAWS(broker,clientId,topicName, qos);
-        //} catch (MqttException e) {
-         //   e.printStackTrace();
-      //  }
-      /*  try {
-             mqttClient = new MqttClient(broker,clientId);
-
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }*/
-
-        //Mqtt ConnectOptions is used to set the additional features to mqtt message
-
-
-
-
-       // SSLSocketFactory sslSocketFactory = ...
-        //options.setSocketFactory(sslSocketFactory);
-
-        try {
-            InputStream caCrtFile = getApplicationContext().getResources().openRawResource(R.raw.aws_root_ca_pem);
-            InputStream crtFile = getApplicationContext().getResources().openRawResource(R.raw.certificate_pem_crt);
-            InputStream keyFile = getApplicationContext().getResources().openRawResource(R.raw.private_pem_key);
-
-            JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
-            options = new MqttConnectOptions();
-            options.setCleanSession(true); //no persistent session
-            options.setKeepAliveInterval(1000);
-           // options.setAutomaticReconnect(true);
-            MqttMessage message = new MqttMessage("Ed Sheeran".getBytes());
-            message.setQos(qos);     //sets qos level 1
-            message.setRetained(true); //sets retained message
-            options.setMqttVersion(MQTT_VERSION_3_1);
-           // Log.d("mypath", String.valueOf(getPrivateKey()));
-            options.setSocketFactory(getSocketFactory(caCrtFile, crtFile, keyFile, ""));
-            mqttClient = new MqttClient(broker,clientId);
-            // mqttClient = new MqttClient(broker,clientId,new MemoryPersistence());
-
-           // mqttAndroidClient = new MqttAndroidClient(getApplicationContext(), broker, clientId,
-             //       new MemoryPersistence(), MqttAndroidClient.Ack.AUTO_ACK);
-
-            mqttClient.connect(options); //connects the broker with connect options
-
-            MqttTopic topic2 = mqttClient.getTopic(topicName);
-
-            topic2.publish(message);    // publishes the message to the topic(test/topic)
-        } catch (Exception e) {
-
-            Log.d("Message_sent",e.toString()+" "+e.getCause()+" "+e.getLocalizedMessage());
-            e.printStackTrace();
-        }
 
      //++++++===========================================================================================
     }
@@ -1033,13 +978,91 @@ https://cryptotools.net/rsagen
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void switch2(View v){
         SwitchButton b = (SwitchButton)v;
-        Log.d("ranojan switch click",""+b.isChecked());
+     //   Log.d("ranojan switch click",""+b.isChecked());
             if(b.isChecked()) {
                  switch2.setThumbColorRes(R.color.red);
                  // Toast.makeText(getApplicationContext(), "" + v.getStateDescription(), Toast.LENGTH_SHORT).show();
             }else{
 
                 switch2.setThumbColorRes(R.color.limeGreen);
+
+                // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                String clientId ="ESP32_Test";//"iotconsole-69053fd3-d360-48b5-85ff-236cb1c89718" ;//"ESP32_Test";//""iotconsole-be928d1a-3b3e-4370-aaa5-5fb498d652b2";//"iotconsole-be928d1a-3b3e-4370-aaa5-5fb498d652b2";
+                String broker = "ssl://a2w5xcmt7e0hk6-ats.iot.us-east-1.amazonaws.com:8883";//"tcp://localhost:1883";8883
+                String topicName = "topic/test_topic/esp32";
+                int qos =0;
+
+
+                try {
+                    InputStream caCrtFile = getApplicationContext().getResources().openRawResource(R.raw.aws_root_ca_pem);
+                    InputStream crtFile = getApplicationContext().getResources().openRawResource(R.raw.certificate_pem_crt);
+                    InputStream keyFile = getApplicationContext().getResources().openRawResource(R.raw.private_pem_key);
+
+                    JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
+                    options = new MqttConnectOptions();
+                    options.setCleanSession(true); //no persistent session
+                    options.setKeepAliveInterval(1000);
+                    options.setConnectionTimeout(10000);
+                   // options.setAutomaticReconnect(true);
+                    MqttMessage message = new MqttMessage("Ed Sheeran".getBytes());
+                    message.setQos(qos);     //sets qos level 1
+
+                    options.setSocketFactory(getSocketFactory(caCrtFile, crtFile, keyFile, ""));
+                    // mqttClient = new MqttClient(broker,clientId);
+                    mqttClient = new MqttClient(broker,clientId,new MemoryPersistence());
+                    Thread thread = new Thread() {
+                        @Override
+                        public void run() {
+                            try {
+                    mqttClient.connect(options); //connects the broker with connect options
+
+                    mqttClient.setCallback(new MqttCallback() {
+                        @Override
+                        public void connectionLost(Throwable me) {
+                            Log.d("ranojan","Connection lost");
+
+                        }
+
+                        @Override
+                        public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
+                            Log.d("ranojan","message Arrived");
+                        }
+
+                        @Override
+                        public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
+                            Log.d("ranojan","deliverd--------");
+                            try {
+                                MqttDeliveryToken token  = (MqttDeliveryToken) iMqttDeliveryToken;
+                                String h = token.getMessage().toString();
+                                Log.d("ranojan","delivered message :"+h);
+
+                            } catch (MqttException me) {
+
+                            }
+                        }
+                    });
+
+                    mqttClient.publish(topicName, message);
+                    MqttTopic topic2 = mqttClient.getTopic(topicName);
+                    topic2.publish(message);    // publishes the message to the topic(test/topic)
+
+                    Log.d("Message_sent","Is Connected: "+mqttClient.isConnected());
+                     mqttClient.subscribe("topic/test_topic/esp32");
+                 //  mqttClient.publish("topic/test_topic/esp32", "Hello, World!".getBytes(), 0, false );
+
+                            } catch (MqttException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    };
+                    thread.start();
+                    //mqttClient.disconnect();
+                } catch (Exception e) {
+
+                    Log.d("Message_sent",e.toString()+" "+e.getCause()+" "+e.getLocalizedMessage());
+                    e.printStackTrace();
+                }
+
             }
 
     }
