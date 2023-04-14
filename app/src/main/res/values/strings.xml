@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Weather Master</string>
+    <string name="app_name">Charger</string>
 
     <!-- to toggle the open close button of the navigation drawer -->
     <string name="nav_open">Open</string>

@@ -6,4 +6,11 @@
     <color name="limeGreen">#32CD32</color>
     <color name="whiteColor">#FFFFFF</color>
     <color name="red">#FF0000</color>
+    <color name="skyBlue">#87CEEB</color>
+    <color name="sun_color">#FDB813</color>
+    <color name="blue">#0000ff</color>
+    <color name="redColor">	#FF0000</color>
+    <color name="royalBlue">#246EE9</color>
+    <color name="greyGold">#b7a388</color>
+    <color name="lighterDarker">#669999</color>
 </resources>

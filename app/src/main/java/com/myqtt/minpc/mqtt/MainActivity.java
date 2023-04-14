@@ -126,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Button c;
     private  String API_KEY ="api_key" ;
     private String channel_url = "https://api.thingspeak.com/channels.json";
-    private SwitchButton switch2;
+
     TextView tvStatus;
 
     // IoT endpoint
@@ -151,12 +151,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private MqttClient mqttClient;
     private MqttConnectOptions options;
     private MqttAndroidClient mqttAndroidClient;
+    Button startButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        tvStatus = (TextView) findViewById(R.id.tt);
+        startButton =   findViewById(R.id.startBtn);
 
         // [cloudshell-user@ip-10-2-125-33 ~]$ aws iot attach-principal-policy --policy-name 'ESP32_Test_Policy' --principal 'us-east-1:d1a86c61-c800-4838-9033-43d4a49c7ae5'
         //++++++++++++++++++++++++++++++++++ Navigation Drawer +++++++++++++++++++++++++++++++++++++
@@ -187,20 +188,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
        // }
 
 
-        b = (Button)findViewById(R.id.button);
-        c = (Button)findViewById(R.id.button2);
-        b.setOnClickListener(v -> {
-        //   Intent ii = new Intent(MainActivity.this, GraphActivity.class);
-            //MainActivity.this.startActivity(ii);
-        });
-
-        c.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-             //   Intent ii = new Intent(MainActivity.this,Main3Activity.class);
-               // MainActivity.this.startActivity(ii);
-            }
-        });
         try {
           //  GetESP32MAC();
          //   GetChannelList();
@@ -212,8 +199,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         }
 
-        switch2 = findViewById(R.id.switch2);
-        switch2.setOnClickListener(this);
+
+        startButton.setOnClickListener(this);
 
 
 
@@ -967,7 +954,7 @@ https://cryptotools.net/rsagen
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void onClick(View v) {
         switch (v.getId() /*to get clicked view id**/) {
-            case R.id.switch2:
+            case R.id.startBtn:
                 switch2(v);
                 break;
             default:
@@ -977,19 +964,19 @@ https://cryptotools.net/rsagen
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void switch2(View v){
-        SwitchButton b = (SwitchButton)v;
+      //  SwitchButton b = (SwitchButton)v;
      //   Log.d("ranojan switch click",""+b.isChecked());
-            if(b.isChecked()) {
-                 switch2.setThumbColorRes(R.color.red);
+          //  if(b.isChecked()) {
+           //      switch2.setThumbColorRes(R.color.red);
                  // Toast.makeText(getApplicationContext(), "" + v.getStateDescription(), Toast.LENGTH_SHORT).show();
-            }else{
+           // }else{
 
-                switch2.setThumbColorRes(R.color.limeGreen);
+              //  switch2.setThumbColorRes(R.color.limeGreen);
 
                 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                 String clientId ="ESP32_Test";//"iotconsole-69053fd3-d360-48b5-85ff-236cb1c89718" ;//"ESP32_Test";//""iotconsole-be928d1a-3b3e-4370-aaa5-5fb498d652b2";//"iotconsole-be928d1a-3b3e-4370-aaa5-5fb498d652b2";
                 String broker = "ssl://a2w5xcmt7e0hk6-ats.iot.us-east-1.amazonaws.com:8883";//"tcp://localhost:1883";8883
-                String topicName = "topic/test_topic/esp32";
+                String topicName = "test_topic/esp32";
                 int qos =0;
 
 
@@ -1003,7 +990,7 @@ https://cryptotools.net/rsagen
                     options.setCleanSession(true); //no persistent session
                     options.setKeepAliveInterval(1000);
                     options.setConnectionTimeout(10000);
-                   // options.setAutomaticReconnect(true);
+                    // options.setAutomaticReconnect(true);
                     MqttMessage message = new MqttMessage("Ed Sheeran".getBytes());
                     message.setQos(qos);     //sets qos level 1
 
@@ -1063,7 +1050,7 @@ https://cryptotools.net/rsagen
                     e.printStackTrace();
                 }
 
-            }
+
 
     }
 

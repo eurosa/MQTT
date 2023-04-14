@@ -80,7 +80,7 @@ public class MainActivityCopy extends AppCompatActivity implements View.OnClickL
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        tvStatus = (TextView) findViewById(R.id.tt);
+     //   tvStatus = (TextView) findViewById(R.id.tt);
         //++++++++++++++++++++++++++++++++++ Navigation Drawer +++++++++++++++++++++++++++++++++++++
         // drawer layout instance to toggle the menu icon to open
         // drawer and back button to close drawer
@@ -108,32 +108,7 @@ public class MainActivityCopy extends AppCompatActivity implements View.OnClickL
        // }
 
 
-        b = (Button)findViewById(R.id.button);
-        c = (Button)findViewById(R.id.button2);
-        b.setOnClickListener(v -> {
-        //   Intent ii = new Intent(MainActivity.this, GraphActivity.class);
-            //MainActivity.this.startActivity(ii);
-        });
-
-        c.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-             //   Intent ii = new Intent(MainActivity.this,Main3Activity.class);
-               // MainActivity.this.startActivity(ii);
-            }
-        });
-        try {
-          //  GetESP32MAC();
-         //   GetChannelList();
-        }catch (Exception ex){}
-        try {
-          //  fetchJsonByUniqueId();
-        }catch (Exception ex)
-        {
-
-        }
-
-        switch2 = findViewById(R.id.switch2);
+     //   switch2 = findViewById(R.id.switch2);
         switch2.setOnClickListener(this);
     }
 
@@ -696,11 +671,11 @@ public class MainActivityCopy extends AppCompatActivity implements View.OnClickL
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void onClick(View v) {
         switch (v.getId() /*to get clicked view id**/) {
-            case R.id.switch2:
-                switch2(v);
-                break;
-            default:
-                break;
+       //     case R.id.switch2:
+                //switch2(v);
+          //      break;
+         //   default:
+               // break;
         }
     }
 

@@ -5,71 +5,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/my_drawer_layout"
+    android:background="@color/skyBlue"
     tools:context="com.myqtt.minpc.mqtt.MainActivity">
 <RelativeLayout
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    >
 
-    <LinearLayout
-        android:id="@+id/tempLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/temp"
-            android:layout_width="182dp"
-            android:layout_height="69dp"
-            android:layout_marginTop="64dp"
-            android:layout_marginEnd="36dp"
-            android:fontFamily="monospace"
-            android:gravity="center"
-            android:text="Temperature"
-            android:textSize="24sp" />
 
-        <TextView
-            android:id="@+id/tt"
-            android:layout_width="172dp"
-            android:layout_height="67dp"
-            android:layout_marginTop="64dp"
-            android:layout_marginEnd="40dp"
-            android:fontFamily="monospace"
-            android:gravity="center"
-            android:text="...."
-            android:textSize="30sp" />
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/humidityLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/tempLayout"
-        android:orientation="horizontal">
-    <TextView
-        android:id="@+id/humid"
-        android:layout_width="186dp"
-        android:layout_height="69dp"
-        android:layout_marginEnd="36dp"
-        android:layout_marginTop="12dp"
-        android:fontFamily="monospace"
-        android:gravity="center"
-        android:text="Humidity"
-        android:textSize="24sp"
-       />
-
-    <TextView
-        android:id="@+id/th"
-        android:layout_width="104dp"
-        android:layout_height="63dp"
-        android:layout_marginEnd="40dp"
-        android:layout_marginTop="20dp"
-        android:fontFamily="monospace"
-        android:gravity="center"
-        android:text="...."
-        android:textSize="30sp"
-      />
-    </LinearLayout>
-
-    <LinearLayout
+   <!-- <LinearLayout
         android:id="@+id/switchLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -89,39 +34,1187 @@
             app:kswTextOn="ON"
 
             />
-    </LinearLayout>
+    </LinearLayout>-->
 
-    <LinearLayout
-        android:id="@+id/graphLayout"
+
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/switchLayout"
-        android:layout_marginTop="2dp"
-        android:orientation="vertical">
+        android:layout_height="match_parent"
+        android:background="@color/skyBlue">
 
-        <Button
-            android:id="@+id/button"
-            android:layout_width="347dp"
-            android:layout_height="91dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="100dp"
-            android:layout_marginBottom="10dp"
-            android:fontFamily="serif-monospace"
-            android:gravity="center"
-            android:text="GRAPH-Temp"
-            android:textSize="36sp" />
+        <RelativeLayout
+            android:id="@+id/rootLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/skyBlue"
+            android:gravity="top">
 
-        <Button
-            android:id="@+id/button2"
-            android:layout_width="347dp"
-            android:layout_height="91dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginBottom="48dp"
-            android:fontFamily="serif-monospace"
-            android:gravity="center"
-            android:text="GRAPH-Humid"
-            android:textSize="36sp" />
-    </LinearLayout>
+            <LinearLayout
+                android:id="@+id/dateLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:orientation="horizontal"
+                android:weightSum="2">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/dateShow"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:text="Date"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold" />
+
+                    <android.widget.TextClock
+                        android:id="@+id/hk_date"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:format12Hour="dd MMM yyyy"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="18sp"
+                        android:textStyle="bold">
+
+                    </android.widget.TextClock>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/timeShow"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:text="Time"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold" />
+
+                    <android.widget.TextClock
+                        android:id="@+id/hk_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:format12Hour="hh:mm:ss"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold">
+
+                    </android.widget.TextClock>
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/lineLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/dateLayout">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray" />
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:id="@+id/infoLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/lineLayout"
+                android:orientation="horizontal"
+                android:weightSum="4">
+
+                <LinearLayout
+                    android:id="@+id/labelLayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+
+                    >
+
+                    <TextView
+                        android:id="@+id/tv1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/marginStart"
+                        android:layout_marginBottom="@dimen/margin_bottom"
+                        android:maxLines="1"
+                        android:text="Voltage"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/marginStart"
+                        android:layout_marginBottom="@dimen/margin_bottom"
+                        android:text="Current"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/marginStart"
+                        android:layout_marginBottom="@dimen/marginBottomHigh"
+                        android:text="Timer"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/marginStart"
+                        android:layout_marginBottom="@dimen/margin_bottom"
+                        android:text="Set Voltage"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/marginStart"
+                        android:layout_marginBottom="@dimen/margin_bottom"
+                        android:text="Set Current"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/marginStart"
+                        android:layout_marginBottom="@dimen/marginBottomHigh"
+                        android:text="Set Time"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/marginStart"
+                        android:layout_marginBottom="@dimen/margin_bottom"
+                        android:text="File Name"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/marginStart"
+                        android:layout_marginBottom="@dimen/margin_bottom"
+                        android:text="MODE"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/marginStart"
+                        android:layout_marginBottom="@dimen/margin_bottom"
+                        android:text="OPERATION"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/marginStart"
+                        android:layout_marginBottom="@dimen/margin_bottom"
+                        android:text="SYSTEM"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/colonLayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <TextView
+                        android:id="@+id/tv2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/margin_bottom"
+                        android:text=":"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/tv2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/margin_bottom"
+                        android:text=":"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/tv2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/marginBottomHigh"
+                        android:text=":"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/tv2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/margin_bottom"
+                        android:text=":"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/tv2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/margin_bottom"
+                        android:text=":"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/tv2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/marginBottomHigh"
+                        android:text=":"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/tv2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/margin_bottom"
+                        android:text=":"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/tv2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/margin_bottom"
+                        android:text=":"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/tv2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/margin_bottom"
+                        android:text=":"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/tv2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/margin_bottom"
+                        android:text=":"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/valLayout"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="2dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/voltage"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:layout_marginBottom="@dimen/margin_bottom"
+
+                        android:textAlignment="textEnd"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/current"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:layout_marginBottom="@dimen/margin_bottom"
+
+                        android:textAlignment="textEnd"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/stTimer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:layout_marginBottom="@dimen/marginBottomHigh"
+                        android:textAlignment="textEnd"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/stVoltage"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:layout_marginBottom="@dimen/margin_bottom"
+
+                        android:textAlignment="textEnd"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/stCurrent"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:layout_marginBottom="@dimen/margin_bottom"
+                        android:textAlignment="textEnd"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/stTime"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:layout_marginBottom="@dimen/marginBottomHigh"
+                        android:textAlignment="textEnd"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/fileName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:layout_marginBottom="@dimen/margin_bottom"
+                        android:text="N150"
+                        android:textAlignment="textEnd"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/Mode"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:layout_marginBottom="@dimen/margin_bottom"
+                        android:text="CVCC"
+                        android:textAlignment="textEnd"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/operationModeView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:layout_marginBottom="@dimen/margin_bottom"
+                        android:text="C-CHG"
+                        android:textAlignment="textEnd"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/systemView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:layout_marginBottom="@dimen/margin_bottom"
+                        android:text="ON"
+                        android:textAlignment="textEnd"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/unitLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tv3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+
+                        android:layout_marginStart="@dimen/marginStart"
+                        android:text="V"
+                        android:layout_marginBottom="@dimen/margin_bottom"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold|italic" />
+
+                    <TextView
+                        android:id="@+id/tv3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/marginStart"
+
+                        android:text="A"
+                        android:layout_marginBottom="@dimen/margin_bottom"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold|italic" />
+
+                    <TextView
+                        android:id="@+id/tv3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/marginStart"
+                        android:text="Min"
+                        android:layout_marginBottom="@dimen/marginBottomHigh"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold|italic" />
+
+                    <TextView
+                        android:id="@+id/tv3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/marginStart"
+                        android:text="V"
+                        android:layout_marginBottom="@dimen/margin_bottom"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold|italic" />
+
+                    <TextView
+                        android:id="@+id/tv3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/marginStart"
+                        android:layout_marginBottom="@dimen/margin_bottom"
+                        android:text="A"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold|italic" />
+
+                    <TextView
+                        android:id="@+id/tv3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/marginStart"
+                        android:text="min"
+                        android:layout_marginBottom="@dimen/marginBottomHigh"
+                        android:textColor="@color/whiteColor"
+                        android:textSize="@dimen/textSize"
+                        android:textStyle="bold|italic" />
+                </LinearLayout>
+
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/controlLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/infoLayout"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="20dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/startBtn"
+                    android:layout_width="100dp"
+                    android:layout_height="70dp"
+                    android:layout_margin="10dp"
+                    android:background="@drawable/mybutton_minus"
+                    android:foregroundGravity="center"
+                    android:padding="6sp"
+                    android:text="Start"
+                    android:textColor="@color/whiteColor"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/stopBtn"
+                    android:layout_width="100dp"
+                    android:layout_height="70dp"
+                    android:layout_margin="10dp"
+                    android:background="@drawable/mybutton_red"
+                    android:foregroundGravity="center"
+                    android:padding="6sp"
+                    android:text="Stop"
+                    android:textColor="@color/whiteColor"
+                    android:textStyle="bold" />
+
+
+            </LinearLayout>
+
+        </RelativeLayout>
+        <!--  <RelativeLayout
+              android:id="@+id/clockLayout2"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:background="@color/royalBlue"
+              android:gravity="top">
+
+
+              <LinearLayout
+                  android:id="@+id/dateLayout"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginTop="20dp"
+                  android:orientation="horizontal"
+                  android:weightSum="2">
+
+                  <LinearLayout
+                      android:layout_width="match_parent"
+                      android:layout_height="match_parent"
+                      android:layout_weight="1"
+                      android:orientation="vertical">
+
+                      <TextView
+                          android:id="@+id/dateShow"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:layout_gravity="center"
+                          android:gravity="center"
+                          android:text="Date"
+                          android:textColor="@color/whiteColor"
+                          android:textSize="@dimen/textSize"
+                          android:textStyle="bold" />
+
+                      <android.widget.TextClock
+                          android:id="@+id/hk_date"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:layout_gravity="center"
+                          android:format12Hour="dd MMM yyyy"
+                          android:textColor="@color/whiteColor"
+                          android:textSize="18sp"
+                          android:textStyle="bold">
+
+                      </android.widget.TextClock>
+
+                  </LinearLayout>
+
+                  <LinearLayout
+                      android:layout_width="match_parent"
+                      android:layout_height="match_parent"
+                      android:layout_weight="1"
+                      android:orientation="vertical">
+
+                      <TextView
+                          android:id="@+id/timeShow"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:layout_gravity="center"
+                          android:layout_weight="1"
+                          android:gravity="center"
+                          android:text="Time"
+                          android:textColor="@color/whiteColor"
+                          android:textSize="@dimen/textSize"
+                          android:textStyle="bold" />
+
+                      <android.widget.TextClock
+                          android:id="@+id/hk_time"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:layout_gravity="center"
+                          android:layout_weight="1"
+                          android:format12Hour="hh:mm:ss"
+                          android:textColor="@color/whiteColor"
+                          android:textSize="@dimen/textSize"
+                          android:textStyle="bold">
+
+                      </android.widget.TextClock>
+                  </LinearLayout>
+
+              </LinearLayout>
+
+              <LinearLayout
+                  android:id="@+id/lineLayout"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_below="@+id/dateLayout">
+
+                  <View
+                      android:layout_width="match_parent"
+                      android:layout_height="1dp"
+                      android:background="@android:color/darker_gray" />
+              </LinearLayout>
+
+              <RelativeLayout
+                  android:id="@+id/voltageLayout"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_below="@+id/lineLayout"
+                  android:layout_marginTop="5dp"
+                  android:layout_marginBottom="@dimen/margin_bottom">
+
+                  <TextView
+                      android:id="@+id/tv1"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_marginStart="@dimen/marginStart"
+                      android:maxLines="1"
+                      android:text="Voltage:"
+                      android:textColor="@color/whiteColor"
+                      android:textSize="@dimen/textSize"
+                      android:textStyle="bold" />
+
+                  <LinearLayout
+                      android:layout_width="200dp"
+                      android:layout_height="wrap_content"
+                      android:layout_toEndOf="@id/tv1"
+                      android:weightSum="2">
+
+                      <TextView
+                          android:id="@+id/tv2"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:layout_marginEnd="6dp"
+                          android:layout_weight="1"
+                          android:text="276"
+                          android:textAlignment="textEnd"
+                          android:textColor="@color/whiteColor"
+                          android:textSize="@dimen/textSize"
+                          android:textStyle="bold" />
+
+                      <TextView
+                          android:id="@+id/tv3"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:layout_marginEnd="5dp"
+                          android:layout_weight="1"
+                          android:gravity="start"
+                          android:text="V"
+                          android:textColor="@color/whiteColor"
+                          android:textSize="@dimen/textSize"
+                          android:textStyle="bold" />
+                  </LinearLayout>
+              </RelativeLayout>
+
+
+              <RelativeLayout
+                  android:id="@+id/currentLayout"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_below="@+id/voltageLayout"
+                  android:layout_marginBottom="@dimen/margin_bottom">
+
+                  <TextView
+                      android:id="@+id/tv1"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_marginStart="@dimen/marginStart"
+                      android:maxLines="1"
+                      android:text="Current:"
+                      android:textColor="@color/whiteColor"
+                      android:textSize="@dimen/textSize"
+                      android:textStyle="bold" />
+
+                  <LinearLayout
+                      android:layout_width="200dp"
+                      android:layout_height="wrap_content"
+                      android:layout_toEndOf="@id/tv1"
+                      android:weightSum="2">
+
+                      <TextView
+                          android:id="@+id/tv2"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:layout_marginEnd="6dp"
+                          android:layout_weight="1"
+                          android:ellipsize="end"
+                          android:text="11.2"
+                          android:textAlignment="textEnd"
+                          android:textColor="@color/whiteColor"
+                          android:textSize="@dimen/textSize"
+                          android:textStyle="bold" />
+
+                      <TextView
+                          android:id="@+id/tv3"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:layout_marginEnd="5dp"
+                          android:layout_weight="1"
+                          android:text="A"
+                          android:textColor="@color/whiteColor"
+                          android:textSize="@dimen/textSize"
+                          android:textStyle="bold" />
+                  </LinearLayout>
+              </RelativeLayout>
+
+              <RelativeLayout
+                  android:id="@+id/timerLayout"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_below="@+id/currentLayout"
+                  android:layout_marginBottom="@dimen/margin_bottom">
+
+                  <TextView
+                      android:id="@+id/tv1"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_marginStart="@dimen/marginStart"
+                      android:layout_marginEnd="30dp"
+                      android:text="Timer:"
+                      android:textColor="@color/whiteColor"
+                      android:textSize="@dimen/textSize"
+                      android:textStyle="bold" />
+
+                  <LinearLayout
+                      android:layout_width="200dp"
+                      android:layout_height="wrap_content"
+                      android:layout_toEndOf="@id/tv1"
+                      android:weightSum="2">
+
+                      <TextView
+                          android:id="@+id/tv2"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:layout_marginEnd="6dp"
+                          android:layout_weight="1"
+                          android:ellipsize="end"
+                          android:text="1"
+                          android:textAlignment="textEnd"
+                          android:textColor="@color/whiteColor"
+                          android:textSize="@dimen/textSize"
+                          android:textStyle="bold" />
+
+                      <TextView
+                          android:id="@+id/tv3"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:layout_weight="1"
+                          android:text="Min"
+                          android:textColor="@color/whiteColor"
+                          android:textSize="@dimen/textSize"
+                          android:textStyle="bold" />
+                  </LinearLayout>
+              </RelativeLayout>
+
+              <RelativeLayout
+                  android:id="@+id/setVoltageLayout"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_below="@+id/timerLayout"
+                  android:layout_marginBottom="@dimen/margin_bottom">
+
+                  <TextView
+                      android:id="@+id/tv1"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_marginStart="@dimen/marginStart"
+                      android:text="Set Voltage:"
+                      android:textColor="@color/whiteColor"
+                      android:textSize="@dimen/textSize"
+                      android:textStyle="bold" />
+
+                  <LinearLayout
+                      android:layout_width="130dp"
+                      android:layout_height="wrap_content"
+                      android:layout_toEndOf="@id/tv1"
+                      android:weightSum="2">
+
+                      <TextView
+                          android:id="@+id/tv2"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:layout_marginEnd="6dp"
+                          android:layout_weight="1"
+                          android:ellipsize="end"
+                          android:text="20"
+                          android:textAlignment="textEnd"
+                          android:textColor="@color/whiteColor"
+                          android:textSize="@dimen/textSize"
+                          android:textStyle="bold" />
+
+                      <TextView
+                          android:id="@+id/tv3"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:layout_weight="1"
+                          android:text="V"
+                          android:textColor="@color/whiteColor"
+                          android:textSize="@dimen/textSize"
+                          android:textStyle="bold" />
+                  </LinearLayout>
+              </RelativeLayout>
+
+
+
+
+              <RelativeLayout
+                  android:id="@+id/setCurrent"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_below="@+id/setVoltageLayout"
+                  android:layout_marginBottom="@dimen/margin_bottom">
+
+                  <TextView
+                      android:id="@+id/tv1"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_marginStart="@dimen/marginStart"
+                      android:maxLines="1"
+                      android:text="Set Current:"
+                      android:textColor="@color/whiteColor"
+                      android:textSize="@dimen/textSize"
+                      android:textStyle="bold" />
+
+                  <LinearLayout
+                      android:layout_width="130dp"
+                      android:layout_height="wrap_content"
+                      android:layout_toEndOf="@id/tv1"
+                      android:weightSum="2">
+
+                      <TextView
+                          android:id="@+id/tv2"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:layout_marginEnd="6dp"
+                          android:layout_weight="1"
+                          android:ellipsize="end"
+                          android:text="10"
+                          android:textAlignment="textEnd"
+                          android:textColor="@color/whiteColor"
+                          android:textSize="@dimen/textSize"
+                          android:textStyle="bold" />
+
+                      <TextView
+                          android:id="@+id/tv3"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:layout_weight="1"
+                          android:text="A"
+                          android:textColor="@color/whiteColor"
+                          android:textSize="@dimen/textSize"
+                          android:textStyle="bold" />
+                  </LinearLayout>
+              </RelativeLayout>
+
+
+              <RelativeLayout
+                  android:id="@+id/setTime"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_below="@+id/setCurrent"
+                  android:layout_marginBottom="@dimen/margin_bottom">
+
+                  <TextView
+                      android:id="@+id/tv1"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_marginStart="@dimen/marginStart"
+                      android:maxLines="1"
+                      android:text="Set Time:"
+                      android:textColor="@color/whiteColor"
+                      android:textSize="@dimen/textSize"
+                      android:textStyle="bold" />
+
+                  <LinearLayout
+                      android:layout_width="180dp"
+                      android:layout_height="wrap_content"
+                      android:layout_toEndOf="@id/tv1"
+                      android:weightSum="2">
+
+                      <TextView
+                          android:id="@+id/tv2"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:layout_marginEnd="6dp"
+                          android:layout_weight="1"
+                          android:ellipsize="end"
+                          android:text="20"
+                          android:textAlignment="textEnd"
+                          android:textColor="@color/whiteColor"
+                          android:textSize="@dimen/textSize"
+                          android:textStyle="bold" />
+
+                      <TextView
+                          android:id="@+id/tv3"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:layout_weight="1"
+                          android:text="min"
+                          android:textColor="@color/whiteColor"
+                          android:textSize="@dimen/textSize"
+                          android:textStyle="bold" />
+                  </LinearLayout>
+              </RelativeLayout>
+
+
+              <RelativeLayout
+                  android:id="@+id/fileLayout"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_below="@+id/setTime"
+                  android:layout_marginBottom="20dp">
+
+                  <TextView
+                      android:id="@+id/tv1"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_marginStart="@dimen/marginStart"
+                      android:layout_marginEnd="5dp"
+                      android:maxLines="1"
+                      android:text="File Name:"
+                      android:textColor="@color/whiteColor"
+                      android:textSize="@dimen/textSize"
+                      android:textStyle="bold" />
+
+                  <LinearLayout
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_toEndOf="@id/tv1"
+                      android:weightSum="2">
+
+                      <TextView
+                          android:id="@+id/tv2"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:layout_marginStart="15dp"
+                          android:layout_marginEnd="5dp"
+                          android:layout_weight="1"
+                          android:ellipsize="end"
+                          android:text="N150"
+                          android:textAlignment="center"
+                          android:textColor="@color/whiteColor"
+                          android:textSize="@dimen/textSize"
+                          android:textStyle="bold" />
+
+                  </LinearLayout>
+              </RelativeLayout>
+
+
+              <LinearLayout
+                  android:id="@+id/modeLayout"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_below="@+id/fileLayout"
+                  android:layout_marginBottom="@dimen/margin_bottom"
+                  android:orientation="horizontal"
+                  android:weightSum="3">
+
+
+                  <TextView
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_marginStart="@dimen/marginStart"
+                      android:layout_weight="1"
+                      android:text="MODE:"
+                      android:textColor="@color/whiteColor"
+                      android:textSize="@dimen/textSize"
+                      android:textStyle="bold" />
+
+
+                  <TextView
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_marginStart="10dp"
+                      android:layout_weight="1"
+                      android:gravity="center"
+                      android:text="CVCC"
+                      android:textColor="@color/whiteColor"
+                      android:textSize="@dimen/textSize"
+                      android:textStyle="bold" />
+
+                  <TextView
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_weight="1" />
+              </LinearLayout>
+
+              <RelativeLayout
+                  android:id="@+id/operationLayout"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_below="@+id/modeLayout"
+                  android:layout_marginBottom="@dimen/margin_bottom"
+                  android:orientation="horizontal"
+
+                  android:weightSum="3">
+
+
+                  <TextView
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_marginStart="@dimen/marginStart"
+                      android:layout_weight="1"
+                      android:text="OPERATION:"
+                      android:textColor="@color/whiteColor"
+                      android:textSize="@dimen/textSize"
+                      android:textStyle="bold" />
+
+
+                  <TextView
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_marginStart="15dp"
+                      android:layout_weight="1"
+                      android:gravity="center"
+                      android:text="C-CHG"
+                      android:textColor="@color/whiteColor"
+                      android:textSize="@dimen/textSize"
+                      android:textStyle="bold" />
+
+                  <TextView
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_weight="1"
+                      android:textStyle="bold" />
+
+              </RelativeLayout>
+
+              <RelativeLayout
+                  android:id="@+id/systemLayout"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_below="@+id/operationLayout"
+                  android:layout_marginTop="2dp"
+                  android:orientation="horizontal"
+                  android:weightSum="3">
+
+
+                  <TextView
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_marginStart="@dimen/marginStart"
+                      android:layout_weight="1"
+                      android:text="SYSTEM:"
+                      android:textColor="@color/whiteColor"
+                      android:textSize="@dimen/textSize"
+                      android:textStyle="bold" />
+
+
+                  <TextView
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_marginStart="10dp"
+                      android:layout_weight="1"
+                      android:gravity="center"
+                      android:text="ON"
+                      android:textColor="@color/whiteColor"
+                      android:textSize="@dimen/textSize"
+                      android:textStyle="bold" />
+
+                  <TextView
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_weight="1"
+                      android:textStyle="bold" />
+
+              </RelativeLayout>
+
+
+
+
+              <LinearLayout
+                  android:id="@+id/LinearLayout"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_below="@+id/systemLayout"
+                  android:layout_marginTop="20dp"
+                  android:background="@drawable/layout_bg"
+                  android:orientation="horizontal"
+                  android:weightSum="2">
+
+              </LinearLayout>
+
+              <LinearLayout
+                  android:id="@+id/setClockLayout"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_below="@id/LinearLayout"
+                  android:layout_marginTop="20dp"
+                  android:layout_marginBottom="20dp"
+                  android:gravity="center"
+                  android:orientation="horizontal">
+
+                  <Button
+                      android:id="@+id/setClock"
+                      android:layout_width="100dp"
+                      android:layout_height="70dp"
+                      android:layout_margin="10dp"
+                      android:background="@drawable/mybutton_minus"
+                      android:foregroundGravity="center"
+                      android:padding="6sp"
+                      android:text="Start"
+                      android:textStyle="bold"
+                      android:textColor="@color/whiteColor" />
+
+                  <Button
+                      android:id="@+id/startBtn"
+                      android:layout_width="100dp"
+                      android:layout_height="70dp"
+                      android:layout_margin="10dp"
+                      android:background="@drawable/mybutton_minus"
+                      android:foregroundGravity="center"
+                      android:padding="6sp"
+                      android:text="Stop"
+                      android:textStyle="bold"
+                      android:textColor="@color/whiteColor" />
+
+
+              </LinearLayout>
+
+
+          </RelativeLayout>
+          -->
+    </ScrollView>
+
 </RelativeLayout>
     <!-- this the navigation view which draws and shows the navigation drawer -->
     <!-- include the menu created in the menu folder -->
