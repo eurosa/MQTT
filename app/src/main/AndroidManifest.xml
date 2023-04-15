@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.rashminpc.mqtttest">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.rashminpc.mqtttest"
+    tools:ignore="CoarseFineLocation">
 
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"
+        tools:ignore="CoarseFineLocation" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <application
         android:allowBackup="true"
         android:icon="@drawable/logo3"
@@ -17,6 +20,12 @@
         android:supportsRtl="true"
         android:usesCleartextTraffic="true"
         android:theme="@style/AppTheme">
+        <receiver android:name="com.myqtt.minpc.mqtt.ServiceReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
         <activity
             android:name="com.myqtt.minpc.mqtt.WifiActivity"
             android:exported="false">
@@ -34,10 +43,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
+        <service android:enabled="true" android:name="com.myqtt.minpc.mqtt.MyMqttService"  android:permission="android.permission.BIND_JOB_SERVICE" />
         <activity android:name="com.myqtt.minpc.mqtt.PubSubActivity" />
 
         <activity android:name="com.myqtt.minpc.mqtt.MainActivity" />
+
     </application>
 
 </manifest>

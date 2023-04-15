@@ -3,14 +3,16 @@ package com.myqtt.minpc.mqtt;
 
 //import static com.github.mikephil.charting.charts.Chart.LOG_TAG;
 
-import static org.eclipse.paho.android.service.MqttAndroidClient.*;
+
 import static org.eclipse.paho.client.mqttv3.MqttConnectOptions.MQTT_VERSION_3_1;
 import static java.nio.ByteBuffer.*;
 
 import android.annotation.SuppressLint;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 
+import android.content.ServiceConnection;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
@@ -25,6 +27,7 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 
+import android.os.IBinder;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -55,6 +58,7 @@ import com.amazonaws.util.IOUtils;
 import com.example.rashminpc.mqtttest.R;
 import com.google.android.material.navigation.NavigationView;
 import com.kyleduo.switchbutton.SwitchButton;
+import com.myqtt.minpc.mqtt.helpers.MqttHelper;
 
 
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
@@ -64,12 +68,13 @@ import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemReader;
-import org.eclipse.paho.android.service.MqttAndroidClient;
+
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
+import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttDeliveryToken;
@@ -106,10 +111,13 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.text.CollationElementIterator;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
@@ -117,6 +125,9 @@ import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
+
+import info.mqtt.android.service.Ack;
+import info.mqtt.android.service.MqttAndroidClient;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, NavigationView.OnNavigationItemSelectedListener{
     private static final String CHANNEL_NAME = "name";
@@ -149,16 +160,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     CognitoCachingCredentialsProvider credentialsProvider;
     AWSIotMqttManager mqttManager;
     private MqttClient mqttClient;
+
     private MqttConnectOptions options;
     private MqttAndroidClient mqttAndroidClient;
     Button startButton;
+
+    String clientId ="ESP32_Test";//"iotconsole-69053fd3-d360-48b5-85ff-236cb1c89718" ;//"ESP32_Test";//""iotconsole-be928d1a-3b3e-4370-aaa5-5fb498d652b2";//"iotconsole-be928d1a-3b3e-4370-aaa5-5fb498d652b2";
+    String broker = "ssl://a2w5xcmt7e0hk6-ats.iot.us-east-1.amazonaws.com:8883";//"tcp://localhost:1883";8883
+    String topicName = "test_topic/esp32";
+    int qos =0;
+    private InputStream caCrtFile;
+    private InputStream crtFile;
+    private InputStream keyFile;
+    private MqttHelper mqttHelper;
+    private TextView voltage;
+    private Timer myTimer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         startButton =   findViewById(R.id.startBtn);
-
+        voltage = findViewById(R.id.voltage);
         // [cloudshell-user@ip-10-2-125-33 ~]$ aws iot attach-principal-policy --policy-name 'ESP32_Test_Policy' --principal 'us-east-1:d1a86c61-c800-4838-9033-43d4a49c7ae5'
         //++++++++++++++++++++++++++++++++++ Navigation Drawer +++++++++++++++++++++++++++++++++++++
         // drawer layout instance to toggle the menu icon to open
@@ -179,87 +202,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-
-      // try {
-            //connect1();
-       // connect1();
-       //} catch (AWSIotException e) {
-      //     e.printStackTrace();
-       // }
+         startButton.setOnClickListener(this);
+         caCrtFile = getApplicationContext().getResources().openRawResource(R.raw.aws_root_ca_pem);
+         crtFile = getApplicationContext().getResources().openRawResource(R.raw.certificate_pem_crt);
+         keyFile = getApplicationContext().getResources().openRawResource(R.raw.private_pem_key);
 
 
+        //++++++===========================================================================================
         try {
-          //  GetESP32MAC();
-         //   GetChannelList();
-        }catch (Exception ex){}
-        try {
-          //  fetchJsonByUniqueId();
-        }catch (Exception ex)
-        {
-
+          SubscribeToAWS();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
-
-        startButton.setOnClickListener(this);
-
-
-
-
-     //++++++===========================================================================================
+       startService(new Intent(this, MyMqttService.class));
     }
 
-    public void SubscribeToAWS(String broker,String clientId,String topic, int qos) throws MqttException {
-        try{
-
-        MemoryPersistence persistence = new MemoryPersistence();
-        MqttClient sampleClient = new MqttClient(broker, clientId, persistence);
-
-            InputStream caCrtFile = getApplicationContext().getResources().openRawResource(R.raw.aws_root_ca_pem);
-            InputStream crtFile = getApplicationContext().getResources().openRawResource(R.raw.certificate_pem_crt);
-            InputStream keyFile = getApplicationContext().getResources().openRawResource(R.raw.private_pem_key);
-
-
-            MqttConnectOptions connectOptions = new MqttConnectOptions();
-            connectOptions.setCleanSession(true); //no persistent session
-           // connectOptions.setKeepAliveInterval(1000);
-           // connectOptions.setSocketFactory(getSocketFactory(caCrtFile, crtFile, keyFile, ""));
- ;
-        connectOptions.setCleanSession(true);
-        Log.d("Connecting to broker: ", broker);
-        sampleClient.connect(connectOptions);
-        Log.d("Connected","connected");
-        sampleClient.setCallback(new MqttCallback() {
-            @Override
-            public void connectionLost(Throwable throwable) {
-                try {
-                    sampleClient.subscribe(topic, qos);
-                } catch (MqttException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void messageArrived(String topic, MqttMessage message) throws Exception {
-
-            }
-
-            @Override
-            public void deliveryComplete(IMqttDeliveryToken token) {
-
-            }
-        });
-       }catch (MqttException me)
-
-            {
-
-                me.printStackTrace();
-                me.printStackTrace();
-                System.exit(1);
-            } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
 
     public static PrivateKey parsePrivateKey(String privateKey) throws Exception {
 
@@ -357,421 +315,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    public void connect2(){
-
-        // Initialize the AWSIotMqttManager with the configuration
-        AWSIotMqttManager mqttManager = new AWSIotMqttManager(
-                "iotconsole-54a71cad-495b-4009-8a41-fa7ef1f580db",
-                "a2w5xcmt7e0hk6-ats.iot.us-east-1.amazonaws.com");
-
-        //AWSMobileClient.getInstance().getIdentityId();
-
-        AttachPolicyRequest attachPolicyReq = new AttachPolicyRequest();
-        attachPolicyReq.setPolicyName("ESP32_Test_Policy"); // name of your IOT AWS policy
-        attachPolicyReq.setTarget(AWSMobileClient.getInstance().getIdentityId());
-        AWSIotClient mIotAndroidClient = new AWSIotClient(AWSMobileClient.getInstance());
-        mIotAndroidClient.setRegion(Region.getRegion(Regions.US_EAST_1)); // name of your IoT Region such as "us-east-1"
-        mIotAndroidClient.attachPolicy(attachPolicyReq);
-
-        credentialsProvider = new CognitoCachingCredentialsProvider(
-                getApplicationContext(), // context
-                COGNITO_POOL_ID, // Identity Pool ID
-                Regions.US_EAST_1 // Region
-        );
-
-        }
-
-
-    public void connect1()  {
-
-        String clientEndpoint = "a2w5xcmt7e0hk6-ats.iot.us-east-1.amazonaws.com";
-        String clientId ="iotconsole-54a71cad-495b-4009-8a41-fa7ef1f580db2";
-        String certificateFile = "/my/path/XXXX-certificate.pem.crt";
-        String privateKeyFile = "/my/path/XXXXX-private.pem.key";
-
-
-        credentialsProvider = new CognitoCachingCredentialsProvider(
-                getApplicationContext(), // context
-                COGNITO_POOL_ID, // Identity Pool ID
-                Regions.US_EAST_1 // Region
-        );
-
-        /*
-
-        -----BEGIN PUBLIC KEY-----
-MIICITANBgkqhkiG9w0BAQEFAAOCAg4AMIICCQKCAgB+quMAbV3OWhX5NejBopv0
-5Zlp4YiaCMYN3nhjWm3TICmRFO1VKJVN8lmvc50iCEougCEK/qF70efDgf5msDHc
-s2dj2Ql/VR7mbJc3MI85JDrcMZbJaiDrgU/kXtZqq+CbNSVBJ9XGjsk5Hs8pwe2o
-SSNHXFyMv/o3D9sX2gfXePev9BHMzEBBBG5JXNMpjwyFzqm2q2jTc9OYGTqOuI3f
-dU4vSK1Xbb2odWvh1pMC08zeDWqzcooyDdzY0YvCJYzEej3igm2pHaKVieB+fgbI
-5je4oQAEUvXV7IDb6Yu0ovIkIha33NaBgOq6SCvecOU9nQxrUQc/mW3VrZ7Hpct4
-NJUGtqWhY9chUmsjhOdo6dBHB12251iU0Y2Lwc0BVBCwY++S0Upwk++J6Dg71kHV
-FAF5Y4BUIRiLDAa2xKetCV0bvGS6Fp8ZPWuN5rOIvAyES7zuSIA5tihCnmTcz04n
-VC4djJUyvxaMYSCQWctjmK/MXkkB53LeFw1KTXMugMHZcxm/ZvsrM62XUbCK2Lg5
-3RKE8xNK1zqd4LmylzDDTefXF6twx35+TFZdsjKXwwqTRlBieNl2zy/cTn/UACtZ
-pD2ZlOwuTRtNKpdxj9iqH2kfNQEZM/9t+MOsUDhmVQXMqX6In3FInbW0q1D7RBDe
-1kKiSKzjxs90+wPGoFjO6QIDAQAB
------END PUBLIC KEY-----
-
------BEGIN RSA PRIVATE KEY-----
-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
------END RSA PRIVATE KEY-----
-https://cryptotools.net/rsagen
-        * */
-
-        /* AttachPolicyRequest attachPolicyReq = new AttachPolicyRequest();
-        attachPolicyReq.setPolicyName("ESP32_Test_Policy"); // name of your IOT AWS policy
-        attachPolicyReq.setTarget(AWSMobileClient.getInstance().getIdentityId());
-        AWSIotClient mIotAndroidClient = new AWSIotClient(AWSMobileClient.getInstance());
-        mIotAndroidClient.setRegion(Region.getRegion(Regions.US_EAST_1)); // name of your IoT Region such as "us-east-1"
-        mIotAndroidClient.attachPolicy(attachPolicyReq);*/
-
-        // MQTT Client
-        mqttManager = new AWSIotMqttManager(clientId, clientEndpoint);
-
-        try {
-            mqttManager.connect(credentialsProvider, new AWSIotMqttClientStatusCallback() {
-                @Override
-                public void onStatusChanged(final AWSIotMqttClientStatus status, final Throwable throwable) {
-                    Log.d("ranojan", "Status = " + String.valueOf(status));
-
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (status == AWSIotMqttClientStatus.Connecting) {
-                                tvStatus.setText("Connecting...");
-
-                            } else if (status == AWSIotMqttClientStatus.Connected) {
-                                tvStatus.setText("Connected");
-
-                            } else if (status == AWSIotMqttClientStatus.Reconnecting) {
-                                if (throwable != null) {
-                                    Log.e("ranojan", "Connection error.", throwable);
-                                }
-                                tvStatus.setText("Reconnecting");
-                            } else if (status == AWSIotMqttClientStatus.ConnectionLost) {
-                                if (throwable != null) {
-                                    Log.e("ranojan", "Connection error.", throwable);
-                                    throwable.printStackTrace();
-                                }
-                                tvStatus.setText("Disconnected");
-                            } else {
-                                tvStatus.setText("Disconnected");
-                            }
-                        }
-                    });
-                }
-            });
-        } catch (final Exception e) {
-            Log.e("ranojan", "Connection error.", e);
-            tvStatus.setText("Error! " + e.getMessage());
-        }
-        /*SampleUtil.KeyStorePasswordPair pair =
-                SampleUtil.getKeyStorePasswordPair(certificateFile, privateKeyFile);
-
-        AWSIotMqttClient mqttclient = new AWSIotMqttClient(clientEndpoint, clientId,
-                pair.keyStore, pair.keyPassword);
-
-        mqttclient.connect();*/
-
-        // Create an AWS IoT MQTT Client
-    /* AWSIotMqttClient mqttClient = new AWSIotMqttClient(clientEndpoint, clientId, "-----BEGIN CERTIFICATE-----\n" +
-                "MIIDWjCCAkKgAwIBAgIVAJPCTZdmpV8nDdfQyKrzfOkhWv8TMA0GCSqGSIb3DQEB\n" +
-                "CwUAME0xSzBJBgNVBAsMQkFtYXpvbiBXZWIgU2VydmljZXMgTz1BbWF6b24uY29t\n" +
-                "IEluYy4gTD1TZWF0dGxlIFNUPVdhc2hpbmd0b24gQz1VUzAeFw0yMzA0MDgwNTM1\n" +
-                "MjZaFw00OTEyMzEyMzU5NTlaMB4xHDAaBgNVBAMME0FXUyBJb1QgQ2VydGlmaWNh\n" +
-                "dGUwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQChcIkxx05vXd5Xk3xi\n" +
-                "8lJ9buflwVK50jStsNW5Wz7v+OFLPszzq+tP5Pw/YcvYcCTM9huJpt/ml6arp3wx\n" +
-                "diIpU5hKfDxG/qEoirl3VbK0tFcLzKmT5WqjVEuoObQmoIK4xt6ETkHH9+TH/k3g\n" +
-                "RslWnLMp6I7MXMuQBAToPCGl4UbElpf1t3WRUYQTdfdHTjDvMrTQLWNbr0PbRQfB\n" +
-                "TpV52fjg/UzsiSmnGY845Sl1svk0EDsMSyEyutWrsJrng/k8GnaZBDXvfA2XN2DY\n" +
-                "cCsfovPsfFVdgsIHSsvrbpMkOOsyEA2y4qClo8bzQNVF3xXyEd+l4oydOiUqQ8wC\n" +
-                "w2rVAgMBAAGjYDBeMB8GA1UdIwQYMBaAFEmnEOqQA7nqONKhDKYCXkiJVUuNMB0G\n" +
-                "A1UdDgQWBBSYYycFPW/EVLlWbhbPBMrMbj/08TAMBgNVHRMBAf8EAjAAMA4GA1Ud\n" +
-                "DwEB/wQEAwIHgDANBgkqhkiG9w0BAQsFAAOCAQEAMMXwYTqiPq0Bx5xAVWUqX2zF\n" +
-                "vvZg2RG3/8KMB+NOTXvHeM4VKU4zqIT2iyWUkKcCQgrWWDyDpvr/J5HoEiWomN2L\n" +
-                "0wrZtm1YxRdbpo4Z0/Q7YFRbWmG/wGby+KY3vggpz41S1dsLWoINDeYOqzmdSBMt\n" +
-                "R/TDxussjdVUTeEmXbKZ73uoJXVYU700c3a1R6DHPD3LOnsg4CWgxgEsj3g54lpV\n" +
-                "TNA74tpHbi1AggbWtDLogeWlsnc++iHM0drmqa0qnrd7txOFkRQHXWKlkJVww8TH\n" +
-                "9ahnlfyP9K0Z0B/k11YTsIKSEX24qvIiveY29UYh64bg/XJGgienQyIWCjsUmA==\n" +
-                "-----END CERTIFICATE-----", "-----BEGIN RSA PRIVATE KEY-----\n" +
-                "MIIEpAIBAAKCAQEAoXCJMcdOb13eV5N8YvJSfW7n5cFSudI0rbDVuVs+7/jhSz7M\n" +
-                "86vrT+T8P2HL2HAkzPYbiabf5pemq6d8MXYiKVOYSnw8Rv6hKIq5d1WytLRXC8yp\n" +
-                "k+Vqo1RLqDm0JqCCuMbehE5Bx/fkx/5N4EbJVpyzKeiOzFzLkAQE6DwhpeFGxJaX\n" +
-                "9bd1kVGEE3X3R04w7zK00C1jW69D20UHwU6Vedn44P1M7IkppxmPOOUpdbL5NBA7\n" +
-                "DEshMrrVq7Ca54P5PBp2mQQ173wNlzdg2HArH6Lz7HxVXYLCB0rL626TJDjrMhAN\n" +
-                "suKgpaPG80DVRd8V8hHfpeKMnTolKkPMAsNq1QIDAQABAoIBADZhbhVyiZ1CBW+C\n" +
-                "otfBwL+36C2gnXkyscQAWT4C2oSDVYC/OtKqCq3y+HVxP/U8cWkJTeVkbO+EDgSs\n" +
-                "ek0++erp2dbdWoCfrTG26Rqlp3jvdpLm8gh7sxwpfQLBzUllsCMF+lae9dGiU1J6\n" +
-                "+0idD505U7C+QbvdVkTA1dZUyxDQ9Mru6Q7FbLuC8SY5MZeZOrKI5eMOcijvCBPX\n" +
-                "cq21wgBvz4NANXJGj1MjWf5fEzY/+eTGpVegHIOlK7ElplB9sm3pGwy9qOTv1Ocy\n" +
-                "G+1Cjv8Ddm7tO8P04PYyDXK36jrGK2PAmPCWVgBUdAPAdD4fd/KXUOJtaJUebvLE\n" +
-                "2G/QjgECgYEAzLTGSKjTOcpaRcTfgOiNvpAVAg+NaY9t5p2kfKaxSi7idSNH09Gg\n" +
-                "C3I7JquuglnvR6JZQmJwZN98/44GZYGqVrFU6777sjO0iAEGhGxm0+XsmVB4BWA6\n" +
-                "zPNHEW7/Tvg0SxdAiS5zpu0MZWc3TDSW1Lg/Dct4no4OAoD0eVMmBLUCgYEAyeRa\n" +
-                "rU2+e1BosadLpSni4mUC+bjrzS63ooHFwvA2mcBM6Q6ngMa4rFuF5G0x/vJaEqUN\n" +
-                "FYj/MVueI8jDrij+GzHPaUs0eAOrBRxlDff/jOvZc2XXwF3wvhN4KNPa3nbhEbnp\n" +
-                "fD88MzUzL1sYbNXduvaS0HD//2DGgS40tQPWwaECgYEAwiIOiYnSB9RnmBMFA3OI\n" +
-                "OVjbE4E8Uwe66iJGhBBxwjCEgyJaU/9REIncnufiL6yqx/ynOdWxUXjBSnqehlVZ\n" +
-                "/a1fI9OTT4TJiNGwJJXJTtuWbi9qI28HVKbClz300ieBMFV01qQ++eeFAgXI43Rc\n" +
-                "NpAk/Cgi0/tUPfud3hGE1KECgYEAl+5gCsFR0mztjJvQQmfmFOddON5fnVZF3WZ5\n" +
-                "k7y/6i6b8lsT1MY3XYW2mfNOx4RMInHRCd7B5LwEovtHvv2cVIzEgIGW56YjAkKf\n" +
-                "DccOqlcmmkAO//Xx4Ki4KUldEUM3FubofZb8z7B+Z2nPVMARD8zVKUWQcPe8CqTi\n" +
-                "B0LvT2ECgYAO6D6Tw8IxgYpvGoPxjQ97DqQCLEJy0oxnT89Hc10kFpA6jYRgErJa\n" +
-                "nnLV/yyfzHDiBDKkW2H/8rLFbVCgeeWBGvPICOTANmZPGHOENsHhxKXNWKoPgjDP\n" +
-                "3K4QuHnthgW2gRyqsRsrN3yfHSYdAFhre//o15xuBIwKj/n7l1FmJg==\n" +
-                "-----END RSA PRIVATE KEY-----\n");*/
-
-
-// Connect to AWS IoT Core
-     //  mqttClient.connect();
-    //    String topic = "test_topic/esp32";
-// Subscribe to a topic
-        /*mqttClient.subscribe(topic, QOS0, new AWSIotMqttNewMessageCallback() {
-            @Override
-            public void onMessageArrived(String topic, byte[] data) {
-                // Handle incoming message
-            }
-        });*/
- //   String topic1 = "test_topic/esp32";
-       // Publish a message to a topic
-     //  mqttClient.publish(topic1, String.valueOf(23));
-
-// Disconnect from AWS IoT Core
-     //   mqttClient.disconnect();
-
-        // Initialize the AWSIotMqttManager with the configuration
-       /* AWSIotMqttManager mqttManager = new AWSIotMqttManager(
-                "iotconsole-9d7b6184-5135-4ddb-8f31-f99a098fb5e1",
-                "a2w5xcmt7e0hk6-ats.iot.eu-north-1.amazonaws.com");
-
-        mqttManager.connect(KeyStore.getInstance(""), new AWSIotMqttClientStatusCallback() {
-            @Override
-            public void onStatusChanged(final AWSIotMqttClientStatus status,
-                                        final Throwable throwable) {
-                Log.d("god_damn", "Status = " + String.valueOf(status));
-            }
-        });
-
-        try {
-            mqttManager.connect(AWSMobileClient.getInstance(), new AWSIotMqttClientStatusCallback() {
-                @Override
-                public void onStatusChanged(final AWSIotMqttClientStatus status, final Throwable throwable) {
-                    Log.d(LOG_TAG, "Connection Status: " + String.valueOf(status));
-                }
-            });
-        } catch (final Exception e) {
-            Log.e(LOG_TAG, "Connection error: ", e);
-        }*/
-
-      /*  try {
-            String tokenKeyName ="";// <TOKEN_KEY_NAME>;
-            String token ="";// <TOKEN>;
-            String tokenSignature ="";// <TOKEN_SIGNATURE>;
-            String customAuthorizerName ="";// <AUTHORIZER_NAME>;
-            mqttManager.connect(
-                    tokenKeyName,
-                    token,
-                    tokenSignature,
-                    customAuthorizerName,
-                    (status, throwable) -> {
-                        Log.d(LOG_TAG, "Status = " + String.valueOf(status));
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (throwable != null) {
-                                    Log.e(LOG_TAG, "Connection error.", throwable);
-                                }
-                            }
-                        });
-                    });
-        } catch (final Exception e) {
-            Log.e(LOG_TAG, "Connection error.", e);
-        }
-*/
-      /*  try {
-            mqttManager.subscribeToTopic("myTopic", AWSIotMqttQos.QOS0
-                    new AWSIotMqttNewMessageCallback() {
-                        @Override
-                        public void onMessageArrived(final String topic, final byte[] data) {
-                            try {
-                                String message = new String(data, "UTF-8");
-                                Log.d(LOG_TAG, "Message received: " + message);
-                            } catch (UnsupportedEncodingException e) {
-                                Log.e(LOG_TAG, "Message encoding error: ", e);
-                            }
-                        }
-                    });
-        } catch (Exception e) {
-            Log.e(LOG_TAG, "Subscription error: ", e);
-        }
-        try {
-            mqttManager.publishString("Hello to all subscribers!", "myTopic", AWSIotMqttQos.QOS0);
-        } catch (Exception e) {
-            Log.e(LOG_TAG, "Publish error: ", e);
-        }
-
-        try {
-            mqttManager.disconnect();
-        } catch (Exception e) {
-            Log.e(LOG_TAG, "Disconnect error: ", e);
-        }*/
-
-        /*
-        GetWifiMacAddress();
-
-        String clientId ="KBUjEzIRCBsvCgcNCSwfHQ4"; MqttClient.generateClientId();
-        final MqttAndroidClient client =  new MqttAndroidClient(getApplicationContext(), "tcp://mqtt3.thingspeak.com:1883", clientId, Ack.AUTO_ACK);
-            //    new MqttAndroidClient(this.getApplicationContext(), "tcp://mqtt3.thingspeak.com:1883",//mqtt:// not working > tcp://working
-              //          clientId);
-
-        MqttConnectOptions options = new MqttConnectOptions();
-        options.setMqttVersion(MqttConnectOptions.MQTT_VERSION_3_1);
-        options.setCleanSession(false);
-        options.setUserName("KBUjEzIRCBsvCgcNCSwfHQ4");
-        options.setPassword("syDJo4Ad/oVb8rjbSAuf8nQE".toCharArray());
-        IMqttToken token = client.connect(options);
-        //IMqttToken token = client.connect();
-        token.setActionCallback(new IMqttActionListener() {
-            @Override
-            public void onSuccess(IMqttToken asyncActionToken) {
-                // We are connected
-                Log.d("file", "onSuccess");
-                //publish(client,"payloadd");
-                subscribe(client,"channels/2071049/subscribe/fields/field3");
-                publish(client, String.valueOf(45));
-             //   subscribe(client,"channels/2071049/fields/field1");
-                client.setCallback(new MqttCallback() {
-                    TextView tt = (TextView) findViewById(R.id.tt);
-                    TextView th = (TextView) findViewById(R.id.th);
-                    @Override
-                    public void connectionLost(Throwable cause) {
-                        Log.d("file", "connectionLost");
-                        Log.d("file 2","some question has been solved");
-                        Log.d("file 3","go for dinner system ready for your unbreakable");
-                    }
-
-                    @Override
-                    public void messageArrived(String topic, MqttMessage message) throws Exception {
-                        Log.d("file 1", message.toString());
-
-                        if (topic.equals("channels/2071049/subscribe/fields/field3")){
-                            tt.setText(message.toString());
-                        }
-
-                        if (topic.equals("channels/2071049/subscribe/fields/field3")){
-                            th.setText(message.toString());
-                        }
-
-                    }
-
-                    @Override
-                    public void deliveryComplete(IMqttDeliveryToken token) {
-
-                    }
-                });
-
-
-            }
-
-            @Override
-            public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                // Something went wrong e.g. connection timeout or firewall problems
-                Log.d("file", "onFailure");
-                // This for failure to share this heavy duty onFailure to solve the problem to overcome this problem my goodness
-
-            }
-        });
-        */
-    }
-
-
-
 
 
     @Override
     public void onRestart()
     {
         super.onRestart();
-/*
-        try {
-            connect1();
-        } catch (AWSIotException e) {
-            e.printStackTrace();
-        }*/
 
-
-        // finish();
-        // startActivity(getIntent());
     }
 
-//    public void printMessege(MqttAndroidClient client){
-//        client.setCallback(new MqttCallback() {
-//            @Override
-//            public void connectionLost(Throwable cause) {
-//
-//            }
-//
-//            @Override
-//            public void messageArrived(String topic, MqttMessage message) throws Exception {
-//                Log.d("file", message.toString());
-//
-//            }
-//
-//            @Override
-//            public void deliveryComplete(IMqttDeliveryToken token) {
-//
-//            }
-//        });
-//    }
+
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
@@ -872,21 +425,8 @@ https://cryptotools.net/rsagen
                 }catch (Exception ex){}
                 // System.out.println(response);
 
-            //    RequestHandler rh = new RequestHandler();
-               // HashMap<String, String> param = new HashMap<String, String>();
-
-               // Populate the request parameters
-             //    param.put(API_KEY, "ILA15VPFYBECOKAS");
-               // param.put(KEY_BILL_ID, "");
-
-               // String result=rh.sendPostRequest(channel_url, param);
-
-                //pDialog.dismiss();
-
-
-
             try {
-                 //JSONObject jsonObject = new JSONObject(response);// giving org.json.JSONArray cannot be converted to JSONObject
+                 // JSONObject jsonObject = new JSONObject(response);// giving org.json.JSONArray cannot be converted to JSONObject
                 if(response!=null) {
                     JSONArray jsonarray = new JSONArray(response);
                     //  JSONObject jsonObject = new JSONObject(response.substring(response.indexOf("{"), response.lastIndexOf("}") + 1));
@@ -922,11 +462,7 @@ https://cryptotools.net/rsagen
 
     @SuppressLint("StaticFieldLeak")
     protected void fetchJsonByUniqueId(){
-        // to show the progressbar
-        // Log.d("my_info_id",mm_id);
-        // netQuantityPopUp=0;
-        // progbar.setVisibility(View.VISIBLE);
-        // showSimpleProgressDialog(this, "Loading...","Fetching Json",false);
+
 
         new AsyncTask<Void, Void, String>(){
             protected String doInBackground(Void[] params) {
@@ -964,64 +500,147 @@ https://cryptotools.net/rsagen
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void switch2(View v){
-      //  SwitchButton b = (SwitchButton)v;
-     //   Log.d("ranojan switch click",""+b.isChecked());
-          //  if(b.isChecked()) {
-           //      switch2.setThumbColorRes(R.color.red);
-                 // Toast.makeText(getApplicationContext(), "" + v.getStateDescription(), Toast.LENGTH_SHORT).show();
-           // }else{
+        //  SwitchButton b = (SwitchButton)v;
+        //   Log.d("ranojan switch click",""+b.isChecked());
+        //  if(b.isChecked()) {
+        //      switch2.setThumbColorRes(R.color.red);
+        // Toast.makeText(getApplicationContext(), "" + v.getStateDescription(), Toast.LENGTH_SHORT).show();
+        // }else{
 
-              //  switch2.setThumbColorRes(R.color.limeGreen);
+        //  switch2.setThumbColorRes(R.color.limeGreen);
 
-                // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                String clientId ="ESP32_Test";//"iotconsole-69053fd3-d360-48b5-85ff-236cb1c89718" ;//"ESP32_Test";//""iotconsole-be928d1a-3b3e-4370-aaa5-5fb498d652b2";//"iotconsole-be928d1a-3b3e-4370-aaa5-5fb498d652b2";
-                String broker = "ssl://a2w5xcmt7e0hk6-ats.iot.us-east-1.amazonaws.com:8883";//"tcp://localhost:1883";8883
-                String topicName = "test_topic/esp32";
-                int qos =0;
+        // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        String clientId ="ESP32_Test";//"iotconsole-69053fd3-d360-48b5-85ff-236cb1c89718" ;//"ESP32_Test";//""iotconsole-be928d1a-3b3e-4370-aaa5-5fb498d652b2";//"iotconsole-be928d1a-3b3e-4370-aaa5-5fb498d652b2";
+        String broker = "ssl://a2w5xcmt7e0hk6-ats.iot.us-east-1.amazonaws.com:8883";//"tcp://localhost:1883";8883
+        String topicName = "test_topic/esp32";
+        int qos =0;
 
 
-                try {
-                    InputStream caCrtFile = getApplicationContext().getResources().openRawResource(R.raw.aws_root_ca_pem);
-                    InputStream crtFile = getApplicationContext().getResources().openRawResource(R.raw.certificate_pem_crt);
-                    InputStream keyFile = getApplicationContext().getResources().openRawResource(R.raw.private_pem_key);
+        try {
+            InputStream caCrtFile = getApplicationContext().getResources().openRawResource(R.raw.aws_root_ca_pem);
+            InputStream crtFile = getApplicationContext().getResources().openRawResource(R.raw.certificate_pem_crt);
+            InputStream keyFile = getApplicationContext().getResources().openRawResource(R.raw.private_pem_key);
 
-                    JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
-                    options = new MqttConnectOptions();
-                    options.setCleanSession(true); //no persistent session
-                    options.setKeepAliveInterval(1000);
-                    options.setConnectionTimeout(10000);
-                    // options.setAutomaticReconnect(true);
-                    MqttMessage message = new MqttMessage("Ed Sheeran".getBytes());
-                    message.setQos(qos);     //sets qos level 1
+            JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
+            options = new MqttConnectOptions();
+            options.setCleanSession(true); //no persistent session
+            options.setKeepAliveInterval(1000);
+            options.setConnectionTimeout(10000);
+            // options.setAutomaticReconnect(true);
+            MqttMessage message = new MqttMessage("Ed Sheeran".getBytes());
+            message.setQos(qos);     //sets qos level 1
 
-                    options.setSocketFactory(getSocketFactory(caCrtFile, crtFile, keyFile, ""));
-                    // mqttClient = new MqttClient(broker,clientId);
-                    mqttClient = new MqttClient(broker,clientId,new MemoryPersistence());
-                    Thread thread = new Thread() {
-                        @Override
-                        public void run() {
-                            try {
-                    mqttClient.connect(options); //connects the broker with connect options
+            options.setSocketFactory(getSocketFactory(caCrtFile, crtFile, keyFile, ""));
+            // mqttClient = new MqttClient(broker,clientId);
+            mqttClient = new MqttClient(broker,clientId,new MemoryPersistence());
+            Thread thread = new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        mqttClient.connect(options); //connects the broker with connect options
 
-                    mqttClient.setCallback(new MqttCallback() {
+                        mqttClient.setCallback(new MqttCallback() {
+                            @Override
+                            public void connectionLost(Throwable me) {
+                                Log.d("ranojan","Connection lost");
+
+                            }
+
+                            @Override
+                            public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
+                                Log.d("ranojan","message Arrived");
+                            }
+
+                            @Override
+                            public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
+                                Log.d("ranojan","deliverd--------");
+                                try {
+                                    MqttDeliveryToken token  = (MqttDeliveryToken) iMqttDeliveryToken;
+                                    String h = token.getMessage().toString();
+                                    Log.d("ranojan","delivered message :"+h);
+
+                                } catch (MqttException me) {
+
+                                }
+                            }
+                        });
+
+                        mqttClient.publish(topicName, message);
+                        MqttTopic topic2 = mqttClient.getTopic(topicName);
+                      //  topic2.publish(message);    // publishes the message to the topic(test/topic)
+
+                        Log.d("Message_sent","Is Connected: "+mqttClient.isConnected());
+                      //  mqttClient.subscribe("test_topic/esp32");
+                        //  mqttClient.publish("topic/test_topic/esp32", "Hello, World!".getBytes(), 0, false );
+
+                    } catch (MqttException e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+            thread.start();
+            //mqttClient.disconnect();
+        } catch (Exception e) {
+
+            Log.d("Message_sent",e.toString()+" "+e.getCause()+" "+e.getLocalizedMessage());
+            e.printStackTrace();
+        }
+
+
+
+    }
+
+
+    public void SubscribeToAWS() {
+        // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        String clientId ="ESP32_Test";//"iotconsole-69053fd3-d360-48b5-85ff-236cb1c89718" ;//"ESP32_Test";//""iotconsole-be928d1a-3b3e-4370-aaa5-5fb498d652b2";//"iotconsole-be928d1a-3b3e-4370-aaa5-5fb498d652b2";
+        String broker = "ssl://a2w5xcmt7e0hk6-ats.iot.us-east-1.amazonaws.com:8883";//"tcp://localhost:1883";8883
+        String topicName = "test_topic/esp32";
+        int qos =0;
+
+
+        try {
+            InputStream caCrtFile = getApplicationContext().getResources().openRawResource(R.raw.aws_root_ca_pem);
+            InputStream crtFile = getApplicationContext().getResources().openRawResource(R.raw.certificate_pem_crt);
+            InputStream keyFile = getApplicationContext().getResources().openRawResource(R.raw.private_pem_key);
+
+            JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
+            options = new MqttConnectOptions();
+            options.setCleanSession(true); //no persistent session
+            options.setKeepAliveInterval(1000);
+            options.setConnectionTimeout(10000);
+            // options.setAutomaticReconnect(true);
+            MqttMessage message = new MqttMessage("Ed Sheeran".getBytes());
+            message.setQos(qos);     //sets qos level 1
+
+            options.setSocketFactory(getSocketFactory(caCrtFile, crtFile, keyFile, ""));
+            // mqttClient = new MqttClient(broker,clientId);
+            mqttAndroidClient = new MqttAndroidClient(getApplicationContext(),broker,clientId, Ack.AUTO_ACK);
+         //   Thread thread = new Thread() {
+              //  @Override
+          //      public void run() {
+
+                    mqttAndroidClient.connect(options); //connects the broker with connect options
+                    mqttAndroidClient.setCallback(new MqttCallback() {
                         @Override
                         public void connectionLost(Throwable me) {
-                            Log.d("ranojan","Connection lost");
-
+                            Log.d("ranojan","Connection lost message arrived");
+                            mqttAndroidClient.connect(options); //connects the broker with connect options
+                            mqttAndroidClient.subscribe("test_topic/esp32",0);
                         }
 
                         @Override
                         public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
-                            Log.d("ranojan","message Arrived");
+                            Log.d("ranojan","message Arrived"+mqttMessage.toString());
                         }
 
                         @Override
                         public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
-                            Log.d("ranojan","deliverd--------");
+                            Log.d("ranojan","arrived--------");
                             try {
                                 MqttDeliveryToken token  = (MqttDeliveryToken) iMqttDeliveryToken;
                                 String h = token.getMessage().toString();
-                                Log.d("ranojan","delivered message :"+h);
+                                Log.d("ranojan","arrived message :"+h);
 
                             } catch (MqttException me) {
 
@@ -1029,33 +648,30 @@ https://cryptotools.net/rsagen
                         }
                     });
 
-                    mqttClient.publish(topicName, message);
-                    MqttTopic topic2 = mqttClient.getTopic(topicName);
-                    topic2.publish(message);    // publishes the message to the topic(test/topic)
+                    //    mqttClient.publish(topicName, message);
+                    // MqttTopic topic2 = mqttClient.getTopic(topicName);
+                    //  topic2.publish(message);    // publishes the message to the topic(test/topic)
 
-                    Log.d("Message_sent","Is Connected: "+mqttClient.isConnected());
-                     mqttClient.subscribe("topic/test_topic/esp32");
-                 //  mqttClient.publish("topic/test_topic/esp32", "Hello, World!".getBytes(), 0, false );
 
-                            } catch (MqttException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    };
-                    thread.start();
-                    //mqttClient.disconnect();
-                } catch (Exception e) {
+                    mqttAndroidClient.subscribe("test_topic/esp32",0);
+                    Log.d("Message_sent","Is Connected: "+mqttAndroidClient.isConnected());
 
-                    Log.d("Message_sent",e.toString()+" "+e.getCause()+" "+e.getLocalizedMessage());
-                    e.printStackTrace();
-                }
+                    //  mqttClient.publish("topic/test_topic/esp32", "Hello, World!".getBytes(), 0, false );
 
+               // }
+           // };
+          //  thread.start();
+            //mqttClient.disconnect();
+        } catch (Exception e) {
+
+            Log.d("Message_sent",e.toString()+" "+e.getCause()+" "+e.getLocalizedMessage());
+            e.printStackTrace();
+        }
 
 
     }
 
-
-    public  SSLSocketFactory getSocketFactory(InputStream caCrtFile, InputStream crtFile, InputStream keyFile,
+    private  SSLSocketFactory getSocketFactory(InputStream caCrtFile, InputStream crtFile, InputStream keyFile,
                                                     String password) throws Exception {
        // Security.addProvider(new BouncyCastleProvider());
         Security.removeProvider("BC");
@@ -1155,6 +771,40 @@ https://cryptotools.net/rsagen
             e.printStackTrace();
         }
         return privateKeyObject;
+    }
+
+    public void AWSIOTSubscribe() throws MqttException {
+
+
+//Override methods from MqttCallback interface
+
+    }
+
+    private void startMqtt() throws Exception {
+        mqttHelper = new MqttHelper(getApplicationContext());
+        mqttHelper.mqttAndroidClient.setCallback(new MqttCallbackExtended() {
+            @Override
+            public void connectComplete(boolean b, String s) {
+                Log.w("Debug","Connected");
+            }
+
+            @Override
+            public void connectionLost(Throwable throwable) {
+
+            }
+
+            @Override
+            public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception {
+                Log.d("ranojan mqttservice",mqttMessage.toString());
+              ///  voltage.setText(mqttMessage.toString());
+               // mChart.addEntry(Float.valueOf(mqttMessage.toString()));
+            }
+
+            @Override
+            public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
+
+            }
+        });
     }
 
 }
