@@ -373,7 +373,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="end"
                         android:layout_marginBottom="@dimen/margin_bottom"
-
+                        android:text="0"
                         android:textAlignment="textEnd"
                         android:textColor="@color/whiteColor"
                         android:textSize="@dimen/textSize"

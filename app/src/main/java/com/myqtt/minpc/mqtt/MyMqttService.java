@@ -1,5 +1,7 @@
 package com.myqtt.minpc.mqtt;
 
+import android.app.Activity;
+import android.app.IntentService;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
@@ -45,8 +47,11 @@ import javax.net.ssl.TrustManagerFactory;
 import info.mqtt.android.service.Ack;
 import info.mqtt.android.service.MqttAndroidClient;
 
-public class MyMqttService extends Service implements MqttCallback, IMqttActionListener {
 
+public class MyMqttService extends IntentService implements MqttCallback, IMqttActionListener {
+    public static final String NOTIFICATION = "com.myqtt.minpc.mqtt";
+    public static final String RESULT = "result";
+    public static  int result = Activity.RESULT_CANCELED;
     private final IBinder binder = new MyBinder();
 
     private MqttAndroidClient mqttClient;
@@ -64,12 +69,15 @@ public class MyMqttService extends Service implements MqttCallback, IMqttActionL
     private final int DISCONNECT_INTERVAL = 20000; // 20 seconds
     private final int CONNECTION_TIMEOUT = 60;
     private final int KEEP_ALIVE_INTERVAL = 200;
+    public static final String MESSAGE = "message";
 
     String clientId ="ESP32_Test";//"iotconsole-69053fd3-d360-48b5-85ff-236cb1c89718" ;//"ESP32_Test";//""iotconsole-be928d1a-3b3e-4370-aaa5-5fb498d652b2";//"iotconsole-be928d1a-3b3e-4370-aaa5-5fb498d652b2";
     String broker = "ssl://a2w5xcmt7e0hk6-ats.iot.us-east-1.amazonaws.com:8883";//"tcp://localhost:1883";8883
     String topic = "test_topic/esp32";
 
-    public MyMqttService() {}
+    public MyMqttService() {
+        super("MyMqttService");
+    }
 
     public class MyBinder extends Binder {
         public MyMqttService getService() {
@@ -81,6 +89,19 @@ public class MyMqttService extends Service implements MqttCallback, IMqttActionL
     @Override
     public IBinder onBind(Intent intent) {
         return binder;
+    }
+
+    @Override
+    protected void onHandleIntent(@Nullable Intent intent) {
+        result = Activity.RESULT_OK;
+        publishResults("Myjhj",result);
+
+    }
+    private void publishResults(String message, int result) {
+        Intent intent = new Intent(NOTIFICATION);
+        intent.putExtra(MESSAGE, message);
+        intent.putExtra(RESULT, result);
+        sendBroadcast(intent);
     }
 
     @Override
@@ -199,9 +220,12 @@ public class MyMqttService extends Service implements MqttCallback, IMqttActionL
 
     @Override
     public void messageArrived(String topic, MqttMessage message)  {
-       // String payload = new String(message.getPayload());
+        // String payload = new String(message.getPayload());
         // do something
         Log.d("MyMqttService Arrived:",message.toString());
+        result = Activity.RESULT_OK;
+        publishResults(message.toString(),result);
+
     }
 
     @Override

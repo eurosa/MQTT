@@ -8,10 +8,12 @@ import static org.eclipse.paho.client.mqttv3.MqttConnectOptions.MQTT_VERSION_3_1
 import static java.nio.ByteBuffer.*;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -176,6 +178,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView voltage;
     private Timer myTimer;
 
+
+    private BroadcastReceiver receiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getExtras();
+            // Toast.makeText(MainActivity.this,
+              //       " "+MyMqttService.result   ,
+             //     Toast.LENGTH_LONG).show();
+            if (bundle != null) {
+                String string = bundle.getString(MyMqttService.MESSAGE);
+                int resultCode = bundle.getInt(MyMqttService.RESULT);
+                if (resultCode == RESULT_OK) {
+
+                    voltage.setText(string);
+                }
+                //else {
+                    //Toast.makeText(MainActivity.this, "Download failed",
+                   //         Toast.LENGTH_LONG).show();
+                 //   voltage.setText("Download failed");
+               // }
+            }
+        }
+    };
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -324,7 +352,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(receiver, new IntentFilter(
+                MyMqttService.NOTIFICATION));
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(receiver);
+    }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
@@ -527,7 +565,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             options.setKeepAliveInterval(1000);
             options.setConnectionTimeout(10000);
             // options.setAutomaticReconnect(true);
-            MqttMessage message = new MqttMessage("Ed Sheeran".getBytes());
+            MqttMessage message = new MqttMessage("Hi".getBytes());
             message.setQos(qos);     //sets qos level 1
 
             options.setSocketFactory(getSocketFactory(caCrtFile, crtFile, keyFile, ""));
