@@ -629,6 +629,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
+    @SuppressLint("SuspiciousIndentation")
     public void SubscribeToAWS() {
         // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         String clientId ="ESP32_Test";//"iotconsole-69053fd3-d360-48b5-85ff-236cb1c89718" ;//"ESP32_Test";//""iotconsole-be928d1a-3b3e-4370-aaa5-5fb498d652b2";//"iotconsole-be928d1a-3b3e-4370-aaa5-5fb498d652b2";
